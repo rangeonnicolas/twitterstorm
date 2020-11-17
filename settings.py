@@ -1,4 +1,5 @@
 import datetime as dt
+from modules.advanced_settings import *  # todo utiliser une autre méthode
 
 CLIENT = "Telegram"
 
