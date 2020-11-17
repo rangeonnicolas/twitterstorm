@@ -27,5 +27,5 @@ class Logger:
     def error(self, *args):
         return self.write(*args)
 
-    def test(self):
+    def test(self, nb):
         pass

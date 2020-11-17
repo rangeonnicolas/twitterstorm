@@ -1,22 +1,5 @@
-rom
-modules.connection
-import AbstractMessageId, AbstractParticipant, AbstractConnection, AbstractChannel, \
+from modules.connection import AbstractMessageId, AbstractParticipant, AbstractConnection, AbstractChannel, \
     AbstractParticipantId, AbstractMessage
-import telegram_settings as ts
-import settings as s
-import sqlite3
-from modules.logger import Logger
-from modules.twitterstorm import TwitterstormError
-
-import datetime as dt
-import sys
-import re
-import struct
-import json
-
-from telethon.sync import TelegramClient
-from telethon.errors.rpcerrorlist import PhoneCodeInvalidError, AuthKeyUnregisteredError, FloodWaitError, \
-    PeerIdInvalidError
 
 import datetime as dt
 import json

@@ -3,7 +3,6 @@ from contextlib import AbstractContextManager
 
 import settings as s
 from modules.logger import Logger
-from modules.telegram import logger
 
 logger = Logger()  # todo_f : revoir
 
