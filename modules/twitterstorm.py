@@ -1,7 +1,7 @@
 import os
 
 import settings as s
-from modules.logger import Logger
+from modules.logger import Logger, create_dirs_if_not_exists
 
 logger = Logger()
 
@@ -27,10 +27,8 @@ def init():  # todo: affiahcer tout le chargement des données
     # todo: envoyer une message au scribe pour lui dire de pas faire de la merde
     # todo: vérifier aussi, en cas de relancement d el'appli après plantage, qu'il n'y a pas d'actions
     # en attente (ex: le scribe a un message qu'il n'a pas validé)
-    for dir_ in [s.DATA_DIR, s.LOG_DIR, s.SESSION_DIR]:
-        if not os.path.exists(dir_):
-            os.makedirs(dir_)
-            logger.test(10002)
+    logger.test(10002)
+    create_dirs_if_not_exists([s.DATA_DIR, s.LOG_DIR, s.SESSION_DIR])
 
 
 class MessageAnalyser:
