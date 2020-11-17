@@ -51,7 +51,7 @@ async def main(conn, analyser):
             known_participants = [pi['participant'] for pi in participants_info]
             participants_info = await conn.check_for_new_participants_in_main_channel(
                 known_participants=known_participants)
-
+ 
         for j, pi in enumerate(participants_info):
 
             participant = pi['participant']
