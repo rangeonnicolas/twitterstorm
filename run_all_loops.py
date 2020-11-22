@@ -4,7 +4,7 @@ from daemon_loops.modules.database import DataBase
 from sandbox_loop import sandbox_loop
 from daemon_loops.modules.participants_actions import actions
 from daemon_loops.modules.telegram import TelegramConnection
-from daemon_loops.modules.twitterstorm_utils import MessageAnalyser
+from daemon_loops.modules.twitterstorm_utils import MessageAnalyser, init
 import asyncio
 
 async def loops(conn, analyser):
