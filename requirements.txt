@@ -12,6 +12,7 @@ pyaes==1.6.1
 pyasn1==0.4.8
 python-dateutil==2.8.1
 pytz==2020.4
+redis==3.5.3
 rsa==4.6
 six==1.15.0
 sqlparse==0.4.1
