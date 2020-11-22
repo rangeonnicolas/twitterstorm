@@ -10,9 +10,12 @@ MESSAGE_EXPIRATION = 2 * 60  # En secondes. Définit le délai au dlà duquel il
 
 PLANNED_MESSAGES = {
     "pm_1": {
-        'seconds_after_participant_arrival_in_loop': 2, # todo : remetre à 2*60
+        'seconds_after_participant_arrival_in_loop': 2 * 60,  # todo : remetre à 2*60
         'sender': "Matthieu",
-        'msg': """J'ai lancé le [thread du compte Amis de la Terre](https://twitter.com/amisdelaterre/status/1326088376106311682) , vont venir aussi des thread sur les comptes \
+        'msg': """🔥🔥 C'EST PARTI !!! 🔥🔥 \
+        
+Je viens de lancer le [thread du compte Amis de la Terre](
+https://twitter.com/amisdelaterre/status/1326088376106311682) , vont venir aussi des thread sur les comptes \
 ANV et ACtion Climat Paris ! Vous pouvez RT et tweeter !"""},
     "pm_2": {
         'seconds_after_participant_arrival_in_loop': 3 * 60,

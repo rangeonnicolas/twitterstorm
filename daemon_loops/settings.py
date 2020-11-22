@@ -32,16 +32,17 @@ Bonjour !
 Et merci de participer à l'action d'interpellation contre Amazon. 😍
 
 Si tu reçois ce message, c'est que tu es inscrit.e dans la boucle __**'[Test] 🛒 surprod - comm Interpellation'**__.
-Cette boucle est destinée aux informations générales de la campagne d'interpellation qui commencer dans : 2 minutes.
+Cette boucle est destinée aux informations générales de la campagne d'interpellation qui commencer dans :\n__**2 
+MINUTES**__
 
-Cependant, elle contient énormément d'activisites, et il n'est pas toujours pratique de suivre tous les messages qui 
+Cependant, elle contient beaucoup d'activisites, et il n'est pas toujours pratique de suivre tous les messages qui 
 passent sur cette boucle ! 😱
 Ainsi, pour que tu puisses te concentrer sur les informations importantes, nous utiliserons en plus de cette énorme 
 boucle, une boucle privée.
 Cette boucle privée, c'est celle dans laquelle tu es en train de lire ce message. Dans cette boucle, il n'y a que toi 
-et moi. 😊""",
+et moi. 😊
 
-                                """Mais moi, je suis qui au fait ?
+Mais moi, je suis qui au fait ?
 
 Je suis un programme informatique (un robot ! 🤖), et j'ai 3 rôles :
 👉🏼 Te transférer les instructions et informations importantes des animateur.ice.s de la campagne d'interpellation (\
@@ -52,18 +53,18 @@ Je suis un programme informatique (un robot ! 🤖), et j'ai 3 rôles :
 👉🏼 De ton côté, je t'invite également à m'envoyer les URL des tweets que tu as posté, afin que je les propose aux 
 autres activistes de la boucle. Je suis spécialement entraîné à reconnaître les URL des tweets (de type 
 https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans les messages que tu m'enverras ici 
-😊.""".format(
-                                    animateurices),
-                                """Ah oui, une dernière chose :
+😊.
+
+Allez, ensemble, on va saturer twitter et mettre la pression à Amazon !!! 💪🏼""".format(
+    animateurices),
+    """Ah oui, une dernière chose :
 
 👉🏼 Si tu n'es finalement plus disponible pour cette campagne, envoies-moi __**STOP**__, et je me taierai.
 👉🏼 Si je suis trop bavard, envoies-moi __**FREQ 1**__, en remplaçant __**1**__ par le nombre de minutes desquelles 
 tu veux que j'espace mes messages. Par exemple, avec __**FREQ 60**__, je ne t'enverrai des messages qu'une fois par 
 heure.
 👉🏼 Et si tu détectes un bug de mon fonctionnement, envoies-moi __**BUG**__ suivi de la description du problème, 
-ça aidera les informaticien.ne.s qui m'ont donné naissance !""",
-                                """Allez, ensemble, on va saturer twitter et mettre la pression à Amazon !!! 💪🏼
-"""]
+ça aidera les informaticien.ne.s qui m'ont donné naissance !"""]
 GOODBYE_SCRIBE_MSGS = ["Au revoir Scribe!"]
 GOODBYE_PARTICIPANT_MSGS = [
     """Tu es sorti.e de la boucle d'interpellation.\nEn tout cas, merci de ta participation.\nSi tu souhaites y  
