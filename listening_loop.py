@@ -1,12 +1,12 @@
 import datetime as dt
-import time
-
-import settings as s  # todo : renommer l'alias
-from modules.database import DataBase
-from modules.logger import Logger
-from modules.participants_actions import actions
-from modules.telegram import TelegramConnection
-from modules.twitterstorm import init, MessageAnalyser
+from daemon_loops.modules.twitterstorm_utils import wait_for_next_iteration
+import daemon_loops.settings as s  # todo : renommer l'alias
+from daemon_loops.modules.database import DataBase
+from daemon_loops.modules.logger import logger
+from daemon_loops.modules.participants_actions import actions
+from daemon_loops.modules.telegram import TelegramConnection
+from daemon_loops.modules.twitterstorm_utils import init, MessageAnalyser
+import asyncio
 
 # todo_f : docstrings
 # todo_f : regrouper les chaines de caractères DESTINEES AU PARTICIPANTS !!
@@ -22,36 +22,34 @@ from modules.twitterstorm import init, MessageAnalyser
 # todo : tester l'ajout d'une personne à la boucle
 # todo : reorganiser les fichiers de conf y faire une classe où on peut appeler s.msgs.SESSION_LISTENING_LOOP
 # comment faire pour faire évoluer la conf durant l'exécution du programme (ex : ajout d'un scribe?)
-
-init()
-db = DataBase()
-logger = Logger()
+# todo : renommer les noms des fichiers qui st en francais
 
 
-async def main(conn, analyser):
-    deltamin = 2
-    check_new_participants_every = 5  # todo: a changer : 30
+async def main_listening_loop(conn, analyser):
+
+    init()
 
     now = dt.datetime.now(s.TIMEZONE)
-    i = 0
+
+    last_loop_execution = dt.datetime(1970,1,1, tzinfo=s.TIMEZONE)
+    last_new_participants_check = now
 
     participants_info = await conn.check_for_new_participants_in_main_channel(first_time=True)
     # todo: first_time et known_participants sont redondants (y'a pas 1 sans l'autre, enfin presque...)
 
     while now < s.END_LISTENING_LOOP:
+        last_loop_execution = await wait_for_next_iteration(last_loop_execution, s.NEW_LISTENING_LOOP_ITERATION_EVERY)
 
         now = dt.datetime.now(s.TIMEZONE)
-
-        i += 1
-        time.sleep(deltamin)  # todo : faire plutot le delta avec la précédente itération
         logmsg = "\tNouvelle itération de la boucle d'écoute ({})".format(now)
         logger.write(logmsg)
 
-        if i % check_new_participants_every == 0:
-            known_participants = [pi['participant'] for pi in participants_info]
+        if now - last_new_participants_check >= dt.timedelta(0,0,0,s.CHECK_NEW_PARTICIPANTS_EVERY):
+            # todo : la vérification des nouveaux participante.s doit elle bien ête dans cette boucle ?
             participants_info = await conn.check_for_new_participants_in_main_channel(
-                known_participants=known_participants)
- 
+                known_participants_info=participants_info)
+            last_new_participants_check = dt.datetime.now(s.TIMEZONE)
+
         for j, pi in enumerate(participants_info):
 
             participant = pi['participant']
@@ -69,9 +67,6 @@ async def main(conn, analyser):
                         # scribes ne reviennent pas ?
                         updated_participant = await analyser.analyse_message_from_scribe(m, updated_participant,
                                                                                          channel, participants_info)
-                        # todo : ici , n'envoyer que ce qu'il y a d'utile dans l'argument participants_info,
-                        #  en effet c'est dangereux car participants_info n'est pas updaté avec le nouveau
-                        #  updated_participant
                 else:
                     for m in msgs:
                         logger.debug("User '%s'[id='%s'] sent message to bot at %s : '%s'"
@@ -91,7 +86,11 @@ async def main(conn, analyser):
     if now >= s.END_LISTENING_LOOP:
         print("La date de fin spécifiée est antérieure à la date actuelle.")
 
+def run():
+    db = DataBase()
+    with TelegramConnection(db) as conn:
+        analyser = MessageAnalyser(conn, actions)
+        conn.run_with_async_loop(main_listening_loop(conn, analyser))
 
-with TelegramConnection(db) as conn:
-    analyser = MessageAnalyser(conn, actions)
-    conn.tg_client.loop.run_until_complete(main(conn, analyser))
+if __name__ == "__main__":
+    run()
