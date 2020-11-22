@@ -1,7 +1,7 @@
 .idea/*
-.ipynb_checkpoints/*
 __pycache__/*
-autres/*
-data/*
+AUTRES/*
+daemon_loops/data/*
 env/*
-modules/__pycache__/*
+*/__pycache__/*
+/db.sqlite3
