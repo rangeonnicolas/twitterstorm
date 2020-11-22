@@ -19,3 +19,7 @@ from django.urls import path
 urlpatterns = [
     path('admin/', admin.site.urls),
 ]
+
+from daemon_loops.tasks import launch_loops
+
+launch_loops.delay()

@@ -32,14 +32,14 @@ Bonjour !
 Et merci de participer à l'action d'interpellation contre Amazon. 😍
 
 Si tu reçois ce message, c'est que tu es inscrit.e dans la boucle __**'[Test] 🛒 surprod - comm Interpellation'**__.
-Cette boucle est destinée aux informations générales de la campagne d'interpellation qui commencer dans :\n__**2 
+Cette boucle est destinée aux informations générales de la campagne d'interpellation qui commencer dans :\n__**2 \
 MINUTES**__
 
-Cependant, elle contient beaucoup d'activisites, et il n'est pas toujours pratique de suivre tous les messages qui 
+Cependant, elle contient beaucoup d'activisites, et il n'est pas toujours pratique de suivre tous les messages qui \ 
 passent sur cette boucle ! 😱
-Ainsi, pour que tu puisses te concentrer sur les informations importantes, nous utiliserons en plus de cette énorme 
+Ainsi, pour que tu puisses te concentrer sur les informations importantes, nous utiliserons en plus de cette énorme \
 boucle, une boucle privée.
-Cette boucle privée, c'est celle dans laquelle tu es en train de lire ce message. Dans cette boucle, il n'y a que toi 
+Cette boucle privée, c'est celle dans laquelle tu es en train de lire ce message. Dans cette boucle, il n'y a que toi \
 et moi. 😊
 
 Mais moi, je suis qui au fait ?
