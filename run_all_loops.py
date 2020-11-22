@@ -16,6 +16,7 @@ async def loops(conn, analyser):
     await c
 
 def run():
+    init()
     db = DataBase()
     with TelegramConnection(db) as conn:
         analyser = MessageAnalyser(conn, actions)

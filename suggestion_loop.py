@@ -44,6 +44,7 @@ async def main_suggestion_loop(conn):
         print("La date de fin spécifiée est antérieure à la date actuelle.")  # todo : difféencier les différentes boucles dans le message
 
 def run():
+    init()
     db = DataBase()
     with TelegramConnection(db) as conn:
         conn.run_with_async_loop(main_suggestion_loop(conn))

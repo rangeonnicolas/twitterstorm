@@ -27,8 +27,6 @@ import asyncio
 
 async def main_listening_loop(conn, analyser):
 
-    init()
-
     now = dt.datetime.now(s.TIMEZONE)
 
     last_loop_execution = dt.datetime(1970,1,1, tzinfo=s.TIMEZONE)
@@ -87,6 +85,7 @@ async def main_listening_loop(conn, analyser):
         print("La date de fin spécifiée est antérieure à la date actuelle.")
 
 def run():
+    init()
     db = DataBase()
     with TelegramConnection(db) as conn:
         analyser = MessageAnalyser(conn, actions)
