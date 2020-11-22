@@ -55,7 +55,7 @@ autres activistes de la boucle. Je suis spécialement entraîné à reconnaître
 https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans les messages que tu m'enverras ici 
 😊.
 
-Allez, ensemble, on va saturer twitter et mettre la pression à Amazon !!! 💪🏼""".format(
+Allez, ensemble on va saturer twitter, et mettre la pression à Amazon !!! 💪🏼""".format(
     animateurices),
     """Ah oui, une dernière chose :
 
