@@ -28,7 +28,7 @@ URL_SUGGESTION_MSG_STR = """🤖 Voici un tweet posté par un·e autre activiste
 
 [Clique ici]({}) pour l'ouvrir, et si ce tweet te plaît, alors Like-le et Retweete-le 💪🏼 !
 
-Si tu veux que je me taise, envoies-moi '__*STOP*__' 😊 . 
+Si tu veux que je me taise, envoies-moi '__**STOP**__' 😊 . 
 """
 
 TEXT_SUGGESTION_MSG_STR = """🤖 Voici un message que tu peux copier-coller dans un tweet.

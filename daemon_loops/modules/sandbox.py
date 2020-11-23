@@ -10,7 +10,7 @@ NEW_SANDBOX_LOOP_ITERATION_EVERY = 20 * 1000
 END_SANDBOX_LOOP = END_LISTENING_LOOP
 MESSAGE_EXPIRATION = 2 * 60  # En secondes. Définit le délai au dlà duquel il esyt trop tard pour envoyer un planned
 # message
-TIME_BEFORE_SUGGESTING = dt.timedelta(0, DEBUT + 5)
+TIME_BEFORE_SUGGESTING = dt.timedelta(0, DEBUT + 60)
 
 orig_tweets = ["https://twitter.com/VignonVirginie/status/1329722635572416512",
                "https://twitter.com/fredjoz/status/1329712809307942912",
@@ -38,8 +38,9 @@ PLANNED_MESSAGES = {
         'sender': "Matthieu",
         'msg': """🔥🔥 C'EST PARTI !!! 🔥🔥 \
         
-Je viens de lancer le [thread du compte Amis de la Terre](
-https://twitter.com/amisdelaterre/status/1326088376106311682) , vont venir aussi des thread sur les comptes \
+Je viens de lancer le \
+[thread du compte Amis de la Terre](https://twitter.com/amisdelaterre/status/1326088376106311682) , \
+vont venir aussi des thread sur les comptes \
 ANV et Action Climat Paris ! Vous pouvez RT et tweeter !"""},
     "pm_2": {
         'seconds_after_participant_arrival_in_loop': 3 * 60,
@@ -51,7 +52,7 @@ ANV et Action Climat Paris ! Vous pouvez RT et tweeter !"""},
 
 Amusez-vous ! 😸"""},
     "pm_3": {
-        'seconds_after_participant_arrival_in_loop': 4 * 60,
+        'seconds_after_participant_arrival_in_loop': DEBUT + 20,
         'sender': "Matthieu",
         'msg': """Voici le tweet acp : https://twitter.com/actionclimat75/status/1326090258438643712, 
 à relayer massivement !"""},
