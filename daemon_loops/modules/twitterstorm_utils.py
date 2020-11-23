@@ -26,7 +26,7 @@ autres activistes de la boucle. Je suis spécialement entraîné à reconnaître
 https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans les messages que tu m'enverras ici \ 
 😊
     
-👉🏼 Si tu souhaites t'adresser à de vrais humains, tu peux poster un message dans la boucle {}.
+👉🏼 Si tu souhaites t'adresser à de vrais humains, tu peux poster un message dans la boucle __**{}**__.
 """.format(s.boucle)
 
 
