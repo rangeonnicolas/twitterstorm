@@ -448,7 +448,7 @@ class AbstractConnection(AbstractContextManager):
             random.seed(dt.datetime.now(s.TIMEZONE).microsecond)
             chosen_one = random.choice(pt)
             to_send = self._format_url_suggestion_mesage(chosen_one)
-            await self.send(participant, channel, to_send, force=True)
+            await self.send(participant, channel, to_send)
 
             participant = self._update_last_suggestion(participant, dt.datetime.now(s.TIMEZONE))
             await quickfix3(

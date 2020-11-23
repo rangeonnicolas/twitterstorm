@@ -28,7 +28,7 @@ URL_SUGGESTION_MSG_STR = """🤖 Voici un tweet posté par un·e autre activiste
 
 [Clique ici]({}) pour l'ouvrir, et si ce tweet te plaît, alors Like-le et Retweete-le 💪🏼 !
 
-Si tu veux que je me taise, envoies-moi '__*STOP*__' 😊 . 
+Si tu veux que je me taise, envoies-moi '__**STOP**__' 😊 . 
 """
 
 TEXT_SUGGESTION_MSG_STR = """🤖 Voici un message que tu peux copier-coller dans un tweet.
@@ -339,33 +339,53 @@ depute_e_s = ["@S_Trompille",
 TWEET_TEXTS = {
     "tweet_1": [""".""", depute_e_s,
                 """, alors que @EmmanuelMacron contribue à la disparition des petits commerces en laissant carte 
-                blanche à Amazon, nous comptons sur vous pour porter le moratoire sur les entrepôts de e-commerce à l'AN lors du projet de loi CCC.\n#AmazonMacronComplice#StopAmazon"""],
+                blanche à Amazon, nous comptons sur vous pour porter le moratoire sur les entrepôts de e-commerce à 
+                l'AN lors du projet de loi CCC.\n#AmazonMacronComplice #StopAmazon"""],
     "tweet_2": ["""Bonjour """, depute_e_s, """
-, @EmmanuelMacron ne compte pas stopper l'installation d'Amazon en 🇫🇷 qui va détruire pourtant 100 000 emplois. Soutiendrez-vous le moratoire sur les entrepôts de e-commerce lors du passage à l'AN de la loi CCC ?\n#AmazonMacronComplice #StopAmazon"""],
+, @EmmanuelMacron ne compte pas stopper l'installation d'Amazon en 🇫🇷 qui va détruire pourtant 100 000 emplois. 
+Soutiendrez-vous le moratoire sur les entrepôts de e-commerce lors du passage à l'AN de la loi CCC 
+?\n#AmazonMacronComplice #StopAmazon"""],
     "tweet_3": [
-        """On ne peut pas compter sur @EmmanuelMacron pour arrêter l'expansion d'Amazon en 🇫🇷 qui signe la mort des petits commerces. """,
+        """On ne peut pas compter sur @EmmanuelMacron pour arrêter l'expansion d'Amazon en 🇫🇷 qui signe la mort des 
+        petits commerces. """,
         depute_e_s, """
- : aurez-vous le courage de vous y opposer? Soutenez le moratoire sur les entrepôts e-commerce dans le PJL CCC\n#AmazonMacronComplice#StopAmazon"""],
+ : aurez-vous le courage de vous y opposer? Soutenez le moratoire sur les entrepôts e-commerce dans le PJL 
+ CCC\n#AmazonMacronComplice #StopAmazon"""],
     "tweet_4": ["""Bonjour """, depute_e_s, """
- : protéger les petits commerçants demande du courage. @EmmanuelMacron ne l'a pas. Vous devez soutenir le moratoire sur les entrepôts de e-commerce lors du projet de loi CCC.\n#StopAmazon : 1 emploi créé, 4,5 emplois supprimés.\n#AmazonMacronComplice"""],
+ : protéger les petits commerçants demande du courage. @EmmanuelMacron ne l'a pas. Vous devez soutenir le moratoire 
+ sur les entrepôts de e-commerce lors du projet de loi CCC.\n#StopAmazon : 1 emploi créé, 4,5 emplois 
+ supprimés.\n#AmazonMacronComplice"""],
     "tweet_5": ["""Bonjour  """, depute_e_s, """
- : protégez les petits commerces 🇫🇷 : soutenez le moratoire sur les entrepôts de e-commerce lors du projet de loi CCC. Stop au massacre.\nAmazon c'est 1 emploi créé pour 4,5 emplois détruits.\n#AmazonMacronComplice #StopAmazon"""],
+ : protégez les petits commerces 🇫🇷 : soutenez le moratoire sur les entrepôts de e-commerce lors du projet de loi 
+ CCC. Stop au massacre.\nAmazon c'est 1 emploi créé pour 4,5 emplois détruits.\n#AmazonMacronComplice #StopAmazon"""],
     "tweet_6": [
-        """Alors qu'@EmmanuelMacron continue d'accueillir Amazon à bras ouverts, pourtant fossoyeur des petits commerces en 🇫🇷 (100 000 emplois seront détruits en 2021), """,
+        """Alors qu'@EmmanuelMacron continue d'accueillir Amazon à bras ouverts, pourtant fossoyeur des petits 
+        commerces en 🇫🇷 (100 000 emplois seront détruits en 2021), """,
         depute_e_s, """
 _AN soutenez le moratoire sur les entrepôts de e-commerce !\n#AmazonMacronComplice #StopAmazon"""],
     "tweet_7": ["""Bonjour """, depute_e_s, """
-. Je m'inquiète pour l'économie 🇫🇷 car @EmmanuelMacron ne freine pas l'implantation d'Amazon qui détruit les petits commerces (1 emploi créé pour 4,5 supprimés). Vous devez soutenir le moratoire sur les entrepôts de e-commerce.\n#AmazonMacronComplice#StopAmazon"""],
+. Je m'inquiète pour l'économie 🇫🇷 car @EmmanuelMacron ne freine pas l'implantation d'Amazon qui détruit les petits 
+commerces (1 emploi créé pour 4,5 supprimés). Vous devez soutenir le moratoire sur les entrepôts de 
+e-commerce\n#AmazonMacronComplice #StopAmazon"""],
     "tweet_8": [""".""", depute_e_s, """
-, @EmmanuelMacron donne carte blanche à l'implantation d'@Amazon en France alors qu'il sait que cela va engendrer près de 100 000 destructions d'emplois. Serez-vous complice de cette catastrophe ? #AmazonMacronComplice #StopAmazon"""],
+, @EmmanuelMacron donne carte blanche à l'implantation d'@Amazon en France alors qu'il sait que cela va engendrer 
+près de 100 000 destructions d'emplois. Serez-vous complice de cette catastrophe ? #AmazonMacronComplice 
+#StopAmazon"""],
     "tweet_9": ["""Bonjour """, depute_e_s, """
-, vous soutenez les commerçant·es de proximité ? Si oui, ayez le courage de dire #StopAmazon face à l'entêtement d'@EmmanuelMacron\n#AmazonMacronComplice"""],
+, vous soutenez les commerçant·es de proximité ? Si oui, ayez le courage de dire #StopAmazon face à l'entêtement 
+d'@EmmanuelMacron\n#AmazonMacronComplice"""],
     "tweet_10": ["""Bonjour """, depute_e_s, """
-, votre majorité @LaREM_AN mène les commerçant·es vers des faillites en cascade en autorisant l'implantation massive d'#Amazon en 🇫🇷, qui va détruire 100 000 emplois. Si vous ne voulez pas être responsable de cette catastrophe, dites #StopAmazon"""],
+, votre majorité @LaREM_AN mène les commerçant·es vers des faillites en cascade en autorisant l'implantation massive 
+d'#Amazon en 🇫🇷, qui va détruire 100 000 emplois. Si vous ne voulez pas être responsable de cette catastrophe, 
+dites #StopAmazon"""],
     "tweet_11": ["""Bonjour """, depute_e_s, """
- , dire oui à l'implantation d'#Amazon aujourd'hui en 🇫🇷, c'est signer la mort des commerces de proximité et la destruction de 100 000 emplois\nVous assumez cette politique pro #JeffBezos en pleine crise économique ?\n#AmazonMacronComplice #StopAmazon"""],
+ , dire oui à l'implantation d'#Amazon aujourd'hui en 🇫🇷, c'est signer la mort des commerces de proximité et la 
+ destruction de 100 000 emplois\nVous assumez cette politique pro #JeffBezos en pleine crise économique 
+ ?\n#AmazonMacronComplice #StopAmazon"""],
     "tweet_12": ["""Bonjour """, depute_e_s, """
-, visiblement @EmmanuelMacron préfère #Amazon aux petits commerçant·es puisqu'il soutient l'implantation massive de la multinationale en 🇫🇷. Et vous, êtes-vous ok pour sacrifier 100 000 emplois pour plaire à Jeff Bezos ? #StopAmazon"""],
+, visiblement @EmmanuelMacron préfère #Amazon aux petits commerçant·es puisqu'il soutient l'implantation massive de 
+la multinationale en 🇫🇷. Et vous, êtes-vous ok pour sacrifier 100 000 emplois pour plaire à Jeff Bezos ? 
+#StopAmazon"""],
     "tweet_13": ["""Bonjour """, depute_e_s, """
 , les petits commerçants ont besoin de vous. Déjà à terre à cause du #coronavirus, ils ne se relèveront pas si vous ne vous opposez pas à l'implantation d'#Amazon en France. Ayez le courage de les défendre !\n#AmazonMacronComplice #StopAmazon"""],
 }

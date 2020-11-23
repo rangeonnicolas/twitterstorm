@@ -35,6 +35,7 @@ def analyse_frequency(message_str):
     except IndexError:
         return False, None
     nb_str = re.sub(",", ".", nb_str)
+    nb_str = nb_str[:6]  # avoids too long numbers sent by a participant
     try:
         minutes = float(nb_str)
     except ValueError:
