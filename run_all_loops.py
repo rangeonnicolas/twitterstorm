@@ -10,9 +10,10 @@ import asyncio
 async def loops(conn, analyser):
     a = asyncio.create_task(main_listening_loop(conn, analyser))
     print(21993,"\nOui euh bon faudra réactuver la boucl de suggestion\n")
-    #b = asyncio.create_task(main_suggestion_loop(conn))
+    b = asyncio.create_task(main_suggestion_loop(conn))
     c = asyncio.create_task(sandbox_loop(conn))  # todo_critical : enlever sandbox
     await a
+    await b
     await c
 
 def run():

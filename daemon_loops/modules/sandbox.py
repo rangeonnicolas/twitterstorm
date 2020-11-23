@@ -1,22 +1,46 @@
 from asgiref.sync import sync_to_async
 
+from daemon_loops.models import SentPlannedMessage, PostedTweet
 from daemon_loops.modules.telegram import TelegramParticipant
 from daemon_loops.settings import END_LISTENING_LOOP, TIMEZONE, CAMPAIN_ID
 import datetime as dt
 
+DEBUT = 1.5 * 60  # en secondes # todo : remetre à 2*60
 NEW_SANDBOX_LOOP_ITERATION_EVERY = 20 * 1000
 END_SANDBOX_LOOP = END_LISTENING_LOOP
-MESSAGE_EXPIRATION = 2 * 60  # En secondes. Définit le délai au dlà duquel il esyt trop tard pour envoyer un planned message
+MESSAGE_EXPIRATION = 2 * 60  # En secondes. Définit le délai au dlà duquel il esyt trop tard pour envoyer un planned
+# message
+TIME_BEFORE_SUGGESTING = dt.timedelta(0, DEBUT + 5)
+
+orig_tweets = ["https://twitter.com/VignonVirginie/status/1329722635572416512",
+               "https://twitter.com/fredjoz/status/1329712809307942912",
+               "https://twitter.com/alma_dufour/status/1329718727256977408",
+               "https://twitter.com/attac_fr/status/1329724618945523713",
+               "https://twitter.com/MarseilleAnv/status/1329717239579336734",
+               "https://twitter.com/ElodieNace/status/1329726146406215680",
+               "https://twitter.com/CharlieFleurene/status/1329477205949353989",
+               "https://twitter.com/fredjoz/status/1329712809307942912",
+               "https://twitter.com/CruzPcruz62/status/1329714776390447105"]
+
+import re
+
+for t in orig_tweets:
+    PostedTweet(campain_id=CAMPAIN_ID,
+                url=t,
+                date_received=dt.datetime.now(TIMEZONE),
+                sender_id="salut_les_gens",
+                sender_name=re.findall("twitter\.com/([^/]+)/", t)[0],
+                ).save()  # todo : faire un dédoublonnage? et une normalisation d'url (enlever les arguments GET)
 
 PLANNED_MESSAGES = {
     "pm_1": {
-        'seconds_after_participant_arrival_in_loop': 2 * 60,  # todo : remetre à 2*60
+        'seconds_after_participant_arrival_in_loop': DEBUT,
         'sender': "Matthieu",
         'msg': """🔥🔥 C'EST PARTI !!! 🔥🔥 \
         
 Je viens de lancer le [thread du compte Amis de la Terre](
 https://twitter.com/amisdelaterre/status/1326088376106311682) , vont venir aussi des thread sur les comptes \
-ANV et ACtion Climat Paris ! Vous pouvez RT et tweeter !"""},
+ANV et Action Climat Paris ! Vous pouvez RT et tweeter !"""},
     "pm_2": {
         'seconds_after_participant_arrival_in_loop': 3 * 60,
         'sender': "Johanna",
@@ -35,10 +59,8 @@ Amusez-vous ! 😸"""},
         'seconds_after_participant_arrival_in_loop': 6 * 60,
         'sender': "Johanna",
         'msg': """#AmazonMacronComplice en TT : 5ème place !! 
-
-On assure grave ! 
-
-On lâche rien !"""},
+🤩 On assure grave ! 🤩
+🔥 On lâche rien ! 🔥"""},
     "pm_5": {
         'seconds_after_participant_arrival_in_loop': 9 * 60,
         'sender': "Johanna",
@@ -79,16 +101,13 @@ N'hésitez pas s'il y a des choses pas claires"""}
 }
 
 
+def switch(cond):
+    return True
 
 
-from django.db import models
+def switch2(participant):
+    return (participant.last_arrival_in_channel + TIME_BEFORE_SUGGESTING) < dt.datetime.now(TIMEZONE)
 
-class SentPlannedMessage(models.Model):
-    campain_id = models.CharField(max_length=50)
-    planned_message_id = models.CharField(max_length=50)
-    sent_at = models.DateTimeField()
-    receiver_id = models.CharField(max_length=50)  # todo : a transformer en foreign key quand on pourra
-    sent_text = models.TextField()
 
 
 class SandboxParticipant(TelegramParticipant):
@@ -108,8 +127,10 @@ class SandboxParticipant(TelegramParticipant):
             it_is_a_bit_too_late_to_send_it = when_to_send_the_message + dt.timedelta(0, MESSAGE_EXPIRATION)
 
             if when_to_send_the_message < now and now < it_is_a_bit_too_late_to_send_it:
-                if not await self._check_if_already_sent(message_id):  # todo : attention à bien checker qu'il a déjà été envoyé APRES le last_arrival, car il a peut etre été envoyé avant, puis il est parti de la boucle puis revenu :)
-                    message = "__**%s (animateur·ice de la mobilisation), vient de t'envoyer un message :**__\n\n%s" % (sender, message_txt)
+                if not await self._check_if_already_sent(message_id):  # todo : attention à bien checker qu'il a déjà
+                    # été envoyé APRES le last_arrival, car il a peut etre été envoyé avant, puis il est parti de la boucle puis revenu :)
+                    message = "🗣 __**%s (animateur·ice de la mob.), vient de t'envoyer un message :**__\n\n%s" % (
+                    sender, message_txt)
                     to_send.append({
                         'msg_id' : message_id,
                         'message' : message,

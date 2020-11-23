@@ -1,9 +1,34 @@
 import os
 import time
 import datetime as dt
+
+from asgiref.sync import sync_to_async
+
 import daemon_loops.settings as s
+from daemon_loops.modules.connection import AbstractParticipant
 from daemon_loops.modules.logger import logger, create_dirs_if_not_exists
 import asyncio
+
+MESSAGE_NOT_UNDERSTOOD_STR = \
+    """🤖 Désolé, je n'ai pas compris ton message.
+    
+    👉🏼 Si tu n'es plus disponible pour cette mob, envoies-moi __**STOP**__, et je me taierai.
+    
+    👉🏼 Si je suis trop (ou pas assez) bavard, envoies __**FREQ 1**__, en remplaçant __**1**__ par le nombre de 
+    minutes desquelles 
+    tu veux que j'espace mes messages.
+    
+    👉🏼 Si tu détectes un bug de mon fonctionnement (ou des fautes d'orthographe), envoies-moi __**BUG**__ suivi de 
+    la description du problème.
+    
+    👉🏼 De ton côté, je t'invite à m'envoyer les URL des tweets que tu as postés, afin que je les propose aux \
+    autres activistes de la boucle. Je suis spécialement entraîné à reconnaître les URL des tweets (de type \
+    https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans les messages que tu m'enverras ici \ 
+    😊
+    
+    👉🏼 Si tu souhaites t'adresser à de vrais humains, tu peux poster un message dans la boucle {}.
+    """.format(s.boucle)
+
 
 class TwitterstormError(Exception):  # todo : arevoir
     def __init__(self, message, prefix="- ERREUR :  "):
@@ -65,18 +90,33 @@ class MessageAnalyser:
                 # todo: ce message n'est pas très compréhensible
                 logger.debug(logmsg)
 
-                await self.conn.send(participant, channel, answer)
+                if answer is not None:
+                    if type(answer) != str:
+                        answer = answer(participant, self.conn, message)
+                    await self.conn.send(participant, channel, answer, force=True)
+
                 self.conn.save_request_from_participant(message, action_name,
                                                         participant)  # todo: il y a peut-être plus d'arguments à
                 # todo : enregistrer en BDD que ça
 
-                participant = action_fn(participant, self.conn, message)
+                action_fn = sync_to_async(action_fn)
+                participant = await action_fn(participant, channel, self.conn, message)
+
+                if 'async_action_func' in action_conf.keys():
+                    async_action_fn = action_conf['async_action_func']
+                    participant = await async_action_fn(participant, channel, self.conn, message)
+
+                if not isinstance(participant, AbstractParticipant):
+                    raise TwitterstormError(
+                        "Attention, dans chaque action de self.actions, la valeur de la clé 'action_func' doit être une fonction retournant un participant.")
+
             else:  ###
                 logger.test(10006)
 
         if not message_is_understood:
             logger.test(10007)
-            # todo  : désolé, je n'ai pas compris votre message !
+            answer = MESSAGE_NOT_UNDERSTOOD_STR
+            await self.conn.send(participant, channel, answer, force=True)
         else:  ###
             logger.test(10008)
 

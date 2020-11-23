@@ -10,18 +10,36 @@ NEW_LISTENING_LOOP_ITERATION_EVERY = 2 * 1000  # En milisecondes
 CHECK_NEW_PARTICIPANTS_EVERY = 5 * 1000  # En milisecondes  # todo_crit : pas mettre 20!
 NEW_SUGGESTION_LOOP_ITERATION_EVERY = 4 * 1000  # En milisecondes
 
-DEFAULT_CONSENT = False
+DEFAULT_SUGGESTIONS_FREQUENCY = 1.2  # En minutes
+MIN_SUGGESTION_FREQUENCY = 0.5  # todo : a changer !
+
+DEFAULT_CONSENT = True
 DEFAULT_TWEET_VALIDATION = False
 
 SEND_ONLY_TO_ME = False
 
 # END_LISTENING_LOOP = dt.datetime(2020,5,24,8,0,0,tzinfo=s.TIMEZONE)
-END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 60 * 60)  # a changer
+END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 60 * 60)  # todo_cr a changer
 END_SUGGESTION_LOOP = END_LISTENING_LOOP  # todo: à merger
+START_SUGGESTIONS = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 5)  # todo_cr a changer
+END_SUGGESTIONS = END_LISTENING_LOOP  # todo_cr a changer
+
+URL_SUGGESTION_MSG_STR = """🤖 Voici un tweet posté par un·e autre activiste (__**{}**__).
+
+[Clique ici]({}) pour l'ouvrir, et si ce tweet te plaît, alors Like-le et Retweete-le 💪🏼 !
+
+Si tu veux que je me taise, envoies-moi '__*STOP*__' 😊 . 
+"""
+
+TEXT_SUGGESTION_MSG_STR = """🤖 Voici un message que tu peux copier-coller dans un tweet.
+
+Pour générer à nouveau ce message, mais en ciblant un·e autre député·e, réponds-moi __**AUTRE**__.
+"""
 
 # todo : pas à la bonne place
 invite_link = "https://t.me/joinchat/I-xqAEUulztdUOz-RTsOdQ"
 animateurices = "Johanna et Matthieu"
+boucle = '[DEMO] 🛒 surprod - comm Interpellation'
 
 # Pour les messages suivants, mettre une liste vide si pas de message à envoyer
 WELCOME_SCRIBE_MSGS = ["Salut Scribe!"]
@@ -29,15 +47,16 @@ WELCOME_NEW_PARTICIPANT_MSGS = ["""
 [🛒 surprod - comm Interpellation]
 
 Bonjour ! 
-Et merci de participer à l'action d'interpellation contre Amazon. 😍
+Merci de participer à l'action d'interpellation contre Amazon. 😍
 
-Si tu reçois ce message, c'est que tu es inscrit.e dans la boucle __**'[Test] 🛒 surprod - comm Interpellation'**__.
-Cette boucle est destinée aux informations générales de la campagne d'interpellation qui commencer dans :\n__**2 \
+Tu reçois ce message car tu es inscrit.e dans la boucle __**'{}'**__.
+Cette boucle est destinée aux informations générales de la mobilisation d'interpellation qui commence dans :\n__**2 \
 MINUTES**__
 
-Cependant, elle contient beaucoup d'activisites, et il n'est pas toujours pratique de suivre tous les messages qui \ 
-passent sur cette boucle ! 😱
-Ainsi, pour que tu puisses te concentrer sur les informations importantes, nous utiliserons en plus de cette énorme \
+Cependant, cette boucle contient beaucoup d'activisites, et il n'est pas toujours pratique de suivre tous les 
+messages qui \ 
+y passent ! 😱
+Ainsi, pour que tu puisses te concentrer sur les informations importantes, nous utiliserons en plus de cette grosse \
 boucle, une boucle privée.
 Cette boucle privée, c'est celle dans laquelle tu es en train de lire ce message. Dans cette boucle, il n'y a que toi \
 et moi. 😊
@@ -45,29 +64,28 @@ et moi. 😊
 Mais moi, je suis qui au fait ?
 
 Je suis un programme informatique (un robot ! 🤖), et j'ai 3 rôles :
-👉🏼 Te transférer les instructions et informations importantes des animateur.ice.s de la campagne d'interpellation (\
-{}). 
-👉🏼 Te suggérer des textes de tweets que tu pourra copier-coller pour les poster sur twitter. 
+👉🏼 Te transférer les instructions importantes des animateur.ice.s de la mobilisation (__**{}**__). 
+👉🏼 Te suggérer des textes que tu pourra copier pour les poster sur twitter. 
 👉🏼 Te suggérer des tweets postés par d'autres activistes pour que tu les Like et les Retweete.
 
-👉🏼 De ton côté, je t'invite également à m'envoyer les URL des tweets que tu as posté, afin que je les propose aux 
+👉🏼 De ton côté, je t'invite à m'envoyer les URL des tweets que tu as postés, afin que je les propose aux 
 autres activistes de la boucle. Je suis spécialement entraîné à reconnaître les URL des tweets (de type 
 https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans les messages que tu m'enverras ici 
 😊.
 
 Allez, ensemble on va saturer twitter, et mettre la pression à Amazon !!! 💪🏼""".format(
-    animateurices),
+    boucle, animateurices),
     """Ah oui, une dernière chose :
 
-👉🏼 Si tu n'es finalement plus disponible pour cette campagne, envoies-moi __**STOP**__, et je me taierai.
-👉🏼 Si je suis trop bavard, envoies-moi __**FREQ 1**__, en remplaçant __**1**__ par le nombre de minutes desquelles 
+👉🏼 Si tu n'es plus disponible pour cette mob, envoies-moi __**STOP**__, et je me taierai.
+👉🏼 Si je suis trop bavard, envoies __**FREQ 1**__, en remplaçant __**1**__ par le nombre de minutes desquelles 
 tu veux que j'espace mes messages. Par exemple, avec __**FREQ 60**__, je ne t'enverrai des messages qu'une fois par 
 heure.
-👉🏼 Et si tu détectes un bug de mon fonctionnement, envoies-moi __**BUG**__ suivi de la description du problème, 
+👉🏼 Si tu détectes un bug de mon fonctionnement, envoies-moi __**BUG**__ suivi de la description du problème, 
 ça aidera les informaticien.ne.s qui m'ont donné naissance !"""]
 GOODBYE_SCRIBE_MSGS = ["Au revoir Scribe!"]
 GOODBYE_PARTICIPANT_MSGS = [
-    """Tu es sorti.e de la boucle d'interpellation.\nEn tout cas, merci de ta participation.\nSi tu souhaites y  
+    """🤖 Tu es sorti.e de la boucle d'interpellation. Je ne t'enverrai donc plus de message. 😊\nSi tu souhaites y  
 revenir plus tard, voici le lien : {}""".format(
         invite_link)]
 

@@ -67,7 +67,8 @@ class DataBase:
                                    "display_name", "is_ok",
                                    "version", "date_fetched",
                                    "last_checked_msg_id", "last_consent_modified",
-                                   "specific_data", "last_arrival_in_channel"]
+                                   "specific_data", "last_arrival_in_channel", "suggestions_frequency",
+                                   "last_suggestion_url_or_text", "last_text_suggestion_id"]
         self.POSTEDTWEET_FIELDS = ["campain", "url", "date_received", "received_from", "validated"]
         self.SENDINGTASKS_FIELDS = ["campain", "version", "id_task", "time_to_send_min", "time_to_send_max", "type",
                                     "to_retweet", "fixed_msg", "percent_active_participants", "min_active_participants",
@@ -88,7 +89,10 @@ class DataBase:
                 last_checked_msg_id text,      
                 last_consent_modified date,
                 specific_data text,
-                last_arrival_in_channel date    
+                last_arrival_in_channel date,
+                suggestions_frequency float, 
+                last_suggestion_url_or_text date,  
+                last_text_suggestion_id text
             )                                  
         ''', []),
             ('''
@@ -250,7 +254,9 @@ class DataBase:
                        now, p.date_fetched, \
                        p.get_last_checked_message_id(), now, \
                        json.dumps(p.get_specific_data()), \
-                       p.last_arrival_in_channel
+                       p.last_arrival_in_channel, \
+                       p.suggestions_frequency, p.last_suggestion_url_or_text, \
+                       p.last_text_suggestion_id
 
                 q = ('INSERT INTO participant({}) VALUES ({})'.format(",".join(self.PARTICIPANT_FIELDS),
                                                                       ",".join(["?"] * len(self.PARTICIPANT_FIELDS))), args)
@@ -264,12 +270,13 @@ class DataBase:
             self.last_dump = dt.datetime.now(s.TIMEZONE)
             self._dump()
 
-    def get_participants(self, participant_class):  # , only_ids_all_versions=False, orig_id=False):
+    def get_participants(self, participant_class, consent=None):  # , only_ids_all_versions=False, orig_id=False):
         result = []
         q = "select {} from participant where ".format(",".join(self.PARTICIPANT_FIELDS))
-        # if not only_ids_all_versions:
-        if 1:
-            q += "version = (select max(version) from participant where campain = '{}') and".format(s.CAMPAIN_ID)
+        q += "version = (select max(version) from participant where campain = '{}') and".format(s.CAMPAIN_ID)
+        if consent is not None:
+            cnst = 1 if consent else 0
+            q += " is_ok = {} and".format(cnst)
         q += " campain = '{}'".format(s.CAMPAIN_ID)
         for row in self._select(q, []):
             result += [participant_class.create_from_db(*row)]
@@ -299,12 +306,18 @@ class DataBase:
 
         queries = []
         for p in participants:
-            q = ('UPDATE participant SET version = ? , last_arrival_in_channel = ? WHERE normalised_id = ? and campain = ?',
-                 #  +" version = (select max(version) from participant where campain = ?)",
-                 (str(now), now, p.get_normalised_id(), s.CAMPAIN_ID))
+            q = (
+            'UPDATE participant SET version = ? , last_arrival_in_channel = ? WHERE normalised_id = ? and campain = ?',
+            #  +" version = (select max(version) from participant where campain = ?)",
+            (str(now), now, p.get_normalised_id(), s.CAMPAIN_ID))
             queries += [q]
         self._execute(queries)
 
+    def update_participant_frequency(self, participant, minutes):
+        q = (
+            'UPDATE participant SET suggestions_frequency = ?  WHERE normalised_id = ? and campain = ?',
+            (minutes, participant.get_normalised_id(), s.CAMPAIN_ID))
+        self._execute([q])
 
     def update_version_of_participants(self, participants, now):
         queries = []
@@ -317,11 +330,24 @@ class DataBase:
 
     def update_participant_consent(self, p, is_ok):
         p.is_ok = is_ok  # todo : ouais c'est un peu chelou de modifier p dans la classe DATABASE...
+        # todo : je pense qqu'on a pas besoin de last_consent_modified
         now = dt.datetime.now(s.TIMEZONE)
         q = ('UPDATE participant SET is_ok = ?, last_consent_modified = ?  WHERE normalised_id = ? and campain = ?',
              (is_ok, now, p.get_normalised_id(), s.CAMPAIN_ID))
         self._execute([q])
         return p
+
+    def update_last_suggestion(self, participant, datetime):
+        q = ('UPDATE participant SET last_suggestion_url_or_text = ?  WHERE normalised_id = ? and campain = ?',
+             (datetime,
+              participant.get_normalised_id(), s.CAMPAIN_ID))
+        self._execute([q])
+
+    def update_last_suggested_text(self, participant, text_id):
+        q = ('UPDATE participant SET last_text_suggestion_id = ?  WHERE normalised_id = ? and campain = ?',
+             (text_id,
+              participant.get_normalised_id(), s.CAMPAIN_ID))
+        self._execute([q])
 
     def update_last_checked_msg(self, participant):
         q = ('UPDATE participant SET last_checked_msg_id = ?  WHERE normalised_id = ? and campain = ?',

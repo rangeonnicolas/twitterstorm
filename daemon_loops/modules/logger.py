@@ -37,15 +37,17 @@ class Logger:
     def error(self, *args):
         return self.write(*args)
 
+    def warning(self, *args):
+        return self.write(*args)
+
     def test(self, nb):
         pass
-
 
     def _generate_ints(self):
         a = [i for i in range(10000, 1 + 10011)]
         b = [i for i in range(20000, 1 + 20100)]
         c = [i for i in range(30000, 1 + 30036)]
-        l = a+b+c
+        l = a + b + c
         with open("data/TEST_INTS.csv", "w+") as f:
             f.write("id\tutile\n")
             for i in l:
