@@ -1,11 +1,10 @@
 import datetime as dt
 from daemon_loops.modules.twitterstorm_utils import wait_for_next_iteration
-import daemon_loops.settings as s
 from daemon_loops.modules.database import DataBase
 from daemon_loops.modules.logger import logger
 from daemon_loops.modules.telegram import TelegramConnection
 import daemon_loops.modules.sandbox as s
-
+from daemon_loops.modules.twitterstorm_utils import init
 
 
 async def sandbox_loop(conn):
@@ -21,7 +20,7 @@ async def sandbox_loop(conn):
         logmsg = "\tNouvelle itération de la boucle SANDBOX ({})".format(now)
         logger.write(logmsg)
 
-        participants_info = await conn.fetch_all_participants()
+        participants_info = await conn.fetch_all_participants(consent=True)
 
         for j, pi in enumerate(participants_info):
 

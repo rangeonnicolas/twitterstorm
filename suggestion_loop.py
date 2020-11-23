@@ -1,18 +1,28 @@
 import datetime as dt
+import random
+
 from daemon_loops.modules.twitterstorm_utils import wait_for_next_iteration
 import daemon_loops.settings as s
 from daemon_loops.modules.database import DataBase
 from daemon_loops.modules.logger import logger
 from daemon_loops.modules.telegram import TelegramConnection
+from daemon_loops.modules.twitterstorm_utils import init
 
-# todo : todo_refactoring : il n'est pas dit que d'autres applis (ex whatsapp) necessite le 1to1channel pour envoyer un message.
-# todo : ... ainsi, la forme participant_info = {'participant': , '1to1_channel': } doit être inconnue du fichier connection.py et encapsulée par le fichier telegram.py, ou bien le 1to1 channel peut même être un attribut de la classe TelegramParticipant.
+sandbox = True  # todo_cr
+if sandbox:
+    from daemon_loops.modules.sandbox import switch, switch2
+
+
+# todo : todo_refactoring : il n'est pas dit que d'autres applis (ex whatsapp) necessite le 1to1channel pour envoyer
+#  un message.
+# todo : ... ainsi, la forme participant_info = {'participant': , '1to1_channel': } doit être inconnue du fichier
+#  connection.py et encapsulée par le fichier telegram.py, ou bien le 1to1 channel peut même être un attribut de la
+#  classe TelegramParticipant.
 
 async def main_suggestion_loop(conn):
-
     now = dt.datetime.now(s.TIMEZONE)
 
-    last_loop_execution = dt.datetime(1970,1,1, tzinfo=s.TIMEZONE)
+    last_loop_execution = dt.datetime(1970, 1, 1, tzinfo=s.TIMEZONE)
     last_new_participants_check = now
 
     #participants_info = await conn.check_for_new_participants_in_main_channel(first_time=True)
@@ -24,21 +34,35 @@ async def main_suggestion_loop(conn):
         logmsg = "\tNouvelle itération de la boucle de suggestions ({})".format(now)
         logger.write(logmsg)
 
-        participants_info = await conn.fetch_all_participants()
+        if switch(
+                now >= s.START_SUGGESTIONS and now <= s.END_SUGGESTIONS):  # todo : faire en sorte que ce soit
+            # dynmiques le start et end (genre c'est le scribe qui envoie des signaux)
 
-        for j, pi in enumerate(participants_info):
+            participants_info = await conn.fetch_all_participants()
 
-            participant = pi['participant']
-            channel = pi['1to1_channel']
+            for j, pi in enumerate(participants_info):
 
-            if not conn.is_bot(participant) and not participant.is_scribe():
-                if participant._last_suggestion_is_far_enough():
+                participant = pi['participant']
+                channel = pi['1to1_channel']
 
+                if not conn.is_bot(participant) and not participant.is_scribe():
 
-                    # :
-                    # else:
-                    # participants_info[j]['participant'] = updated_participant
-                    pass
+                    if switch2(participant):
+
+                        now = dt.datetime.now(s.TIMEZONE)
+
+                        delta = dt.timedelta(0, 60 * participant.suggestions_frequency)
+                        if participant.last_suggestion_url_or_text is None or (
+                                participant.last_suggestion_url_or_text + delta <= now):
+                            if random.choice([0, 1]):
+                                updated_participant, is_sent = await conn.send_a_tweet_url(participant, channel)
+                                if not is_sent:
+                                    updated_participant, is_sent = await conn.send_suggestion(participant, channel)
+                            else:
+                                updated_participant, is_sent = await conn.send_suggestion(participant, channel)
+                                if not is_sent:
+                                    updated_participant, is_sent = await conn.send_a_tweet_url(participant, channel)
+                            participants_info[j]['participant'] = updated_participant
 
     if now >= s.END_SUGGESTION_LOOP:
         print("La date de fin spécifiée est antérieure à la date actuelle.")  # todo : difféencier les différentes boucles dans le message

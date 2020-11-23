@@ -8,6 +8,8 @@ from daemon_loops.modules.telegram import TelegramConnection
 from daemon_loops.modules.twitterstorm_utils import init, MessageAnalyser
 import asyncio
 
+# todo_cr : quand on relance le prog, faire en sorte de ne pas analyser les msgs de moins de 30min avant. sinon si la
+#  bdd est supprimée on réanaluse touuuuuuus les messages
 # todo_f : docstrings
 # todo_f : regrouper les chaines de caractères DESTINEES AU PARTICIPANTS !!
 # todo_f : avaoir un vrai logger
