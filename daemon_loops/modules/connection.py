@@ -1,8 +1,36 @@
 import datetime as dt
+import random
 from contextlib import AbstractContextManager
 
+from asgiref.sync import sync_to_async
+
 import daemon_loops.settings as s
+from daemon_loops.models import PostedTweet, SentTweetUrl, SentTextSuggestion
 from daemon_loops.modules.logger import logger  # todo : revoir
+from daemon_loops.modules.message_generator import MessageGenerator
+
+
+@sync_to_async
+def quickfix3(**kwargs):
+    SentTweetUrl(  # todo : a déplacer dans la classe BDD
+        **kwargs
+    ).save()
+
+
+@sync_to_async
+def quixkfix(**kwargs):  # todo : pas bo
+    SentTextSuggestion(**kwargs).save()
+
+
+@sync_to_async
+def quifix(**kwargs):
+    return [a for a in SentTweetUrl.objects.filter(**kwargs)]
+
+
+@sync_to_async
+def quifix2(already_suggested_urls, campain_id=None, sender_id=None):
+    return [a for a in PostedTweet.objects.filter(campain_id=campain_id).exclude(sender_id=sender_id). \
+        exclude(url__in=already_suggested_urls)]  # query à tester
 
 
 class AbstractChannelId:
@@ -65,7 +93,10 @@ class AbstractParticipant:
                  date_fetched,
                  last_checked_msg_id,
                  last_consent_modified,
-                 last_arrival_in_channel
+                 last_arrival_in_channel,
+                 suggestions_frequency,
+                 last_suggestion_url_or_text,
+                 last_text_suggestion_id
                  ):
         logger.test(30008)
         self._check_id_type(id_)
@@ -78,6 +109,9 @@ class AbstractParticipant:
         self.date_fetched = date_fetched
         self.last_consent_modified = last_consent_modified
         self.last_arrival_in_channel = last_arrival_in_channel
+        self.suggestions_frequency = suggestions_frequency
+        self.last_suggestion_url_or_text = last_suggestion_url_or_text
+        self.last_text_suggestion_id = last_text_suggestion_id
 
         self.last_checked_msg_id = None
         self.set_last_checked_msg(last_checked_msg_id)
@@ -130,7 +164,11 @@ class AbstractParticipant:
                        last_checked_msg_id,
                        last_consent_modified,
                        specific_data,
-                       last_arrival_in_channel):
+                       last_arrival_in_channel,
+                       suggestions_frequency,
+                       last_suggestion_url_or_text,
+                       last_text_suggestion_id
+                       ):
         raise NotImplementedError()
 
 
@@ -166,11 +204,11 @@ class AbstractConnection(AbstractContextManager):
                 '1to1_channel': await self._get_1to1_channel(p)}
                     for p in participants_list]
 
-    async def fetch_all_participants(self):
+    async def fetch_all_participants(self, consent=None):
         """
 
         """
-        participants = await self._format_participants_info(self._get_db_participants())
+        participants = await self._format_participants_info(self._get_db_participants(consent=consent))
         return participants
 
     async def check_for_new_participants_in_main_channel(self, first_time=False, known_participants_info=[]):
@@ -268,13 +306,14 @@ class AbstractConnection(AbstractContextManager):
                                          'detected': None,  # todo : c'est quoi ça ?
                                          "action_token": action}])
 
-    def _get_db_participants(self):
+    def _get_db_participants(self, consent=None):
         """
 
         @rtype: list(AbstractParticipant)
         """
         logger.test(30025)
-        return [p for p in self.db.get_participants(self._get_participant_class()) if self._is_reachable(p)]
+        return [p for p in self.db.get_participants(self._get_participant_class(), consent=consent) if
+                self._is_reachable(p)]
 
     def _insert_participants(self, participants, now):
         """
@@ -303,20 +342,25 @@ class AbstractConnection(AbstractContextManager):
         await self._send_message(channel, msg)
         self._record_sent_message(participant, msg)
 
-    async def send(self, participant, channel, msg, debug=False):
+    async def send(self, participant, channel, msg, force=False, debug=False):
         """
 
         @rtype: None
         """
-        print("Wesh mais gros, où tu vérifie si les gens sont reachable avant de leur envoyer??????????????")
-        # todo : à faire!!!!!!!!!!!!!!!
         if not s.SEND_ONLY_TO_ME:
             logger.test(30029)
             if not self.is_bot(participant):
                 logger.test(30032)
                 logger.test(30033)
                 logger.test(30034)
-                await self._send_and_record_message(participant, channel, msg)
+                if participant.is_ok or force:
+                    await self._send_and_record_message(participant, channel, msg)
+                else:
+                    logger.warning(
+                        "Il est bizarre que l'on tente d'envoyer un message à quelqu'un.e qui ne le souhaite pas." \
+                        "(participant=%s (id=%s), '%s')" % (
+                        participant.display_name, participant.get_normalised_id(), msg))
+
             else:  ###
                 logger.test(30033)
         else:
@@ -354,6 +398,78 @@ class AbstractConnection(AbstractContextManager):
     def _update_version_of_known_participants(self, participants, now):
         logger.test(30036)
         self.db.update_version_of_participants(participants, now)
+
+    def update_suggestions_frequency(self, participant, minutes):
+        self.db.update_participant_frequency(participant, minutes)
+        participant.suggestions_frequency = minutes
+        return participant
+
+    def _update_last_suggestion(self, participant, datetime):
+        self.db.update_last_suggestion(participant, dt.datetime.now(s.TIMEZONE))
+        participant.last_suggestion_url_or_text = datetime
+        return participant
+
+    def _update_last_suggested_text(self, participant, text_id, datetime):
+        participant = self._update_last_suggestion(participant, datetime)
+        self.db.update_last_suggested_text(participant, text_id)
+        participant.last_text_suggestion_id = text_id
+        return participant
+
+    async def send_suggestion(self, participant, channel, text_id=None, force=False):
+
+        if text_id is None:
+            random.seed(dt.datetime.now(s.TIMEZONE).microsecond)
+            if not len(s.TWEET_TEXTS.keys()):
+                return participant, False
+            text_ids = list(s.TWEET_TEXTS.keys())
+            text_id = random.choice(text_ids)
+
+        text = MessageGenerator.generate_one_message([s.TWEET_TEXTS[text_id]])
+
+        messages = self._format_text_suggestion_mesage(text)
+        for to_send in messages:
+            await self.send(participant, channel, to_send, force=force)
+
+        participant = self._update_last_suggested_text(participant, text_id, dt.datetime.now(s.TIMEZONE))
+        await quixkfix(campain_id=s.CAMPAIN_ID,
+                       text_id=text_id,
+                       sent_at=dt.datetime.now(s.TIMEZONE),
+                       receiver_id=participant.get_normalised_id(),
+                       sent_text=text)  # todo : pas bo
+
+        return participant, True
+
+    async def send_a_tweet_url(self, participant, channel):
+        st = await quifix(campain_id=s.CAMPAIN_ID, receiver_id=participant.get_normalised_id())
+        already_suggested_urls = [t.url for t in st]
+        pt = await quifix2(already_suggested_urls, campain_id=s.CAMPAIN_ID, sender_id=participant.get_normalised_id())
+
+        if len(pt):
+            random.seed(dt.datetime.now(s.TIMEZONE).microsecond)
+            chosen_one = random.choice(pt)
+            to_send = self._format_url_suggestion_mesage(chosen_one)
+            await self.send(participant, channel, to_send, force=True)
+
+            participant = self._update_last_suggestion(participant, dt.datetime.now(s.TIMEZONE))
+            await quickfix3(
+                campain_id=s.CAMPAIN_ID,
+                url=chosen_one.url,
+                date_sent=dt.datetime.now(s.TIMEZONE),
+                receiver_id=participant.get_normalised_id())
+
+            return participant, True
+        else:
+            return participant, False
+
+    def _format_url_suggestion_mesage(self, posted_tweet):
+        name = posted_tweet.sender_name
+        url = posted_tweet.url
+        msg = s.URL_SUGGESTION_MSG_STR.format(name, url)
+        return msg
+
+    def _format_text_suggestion_mesage(self, text):
+        # Le message 'text' doit être dans un message bien distinct, afin de pouvoir facilement le copier-coller
+        return [s.TEXT_SUGGESTION_MSG_STR, text]  # todo : l'inclure directement dans une url tweetable
 
     def connect(self):
         """

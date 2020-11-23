@@ -9,17 +9,23 @@ import struct
 import sys
 import dateutil.parser
 
+from daemon_loops.modules.logger import Logger
+from daemon_loops.modules.twitterstorm_utils import init
+
+from daemon_loops.modules.database import DataBase
+from daemon_loops.modules.participants_actions import actions
+
 from telethon.errors.rpcerrorlist import PhoneCodeInvalidError, AuthKeyUnregisteredError, FloodWaitError, \
     PeerIdInvalidError
 from telethon.sync import TelegramClient
 
 import daemon_loops.settings as s
 import daemon_loops.telegram_settings as ts
-from daemon_loops.modules.connection import AbstractMessageId, AbstractParticipant, AbstractConnection, AbstractChannel, \
+from daemon_loops.modules.connection import AbstractMessageId, AbstractParticipant, AbstractConnection, \
+    AbstractChannel, \
     AbstractParticipantId, AbstractMessage
 from daemon_loops.modules.logger import logger, error_logger
-from daemon_loops.modules.twitterstorm_utils import TwitterstormError
-
+from daemon_loops.modules.twitterstorm_utils import TwitterstormError, MessageAnalyser
 
 
 class TelegramChannelId:
@@ -148,7 +154,10 @@ class TelegramParticipant(AbstractParticipant):
                  date_fetched,
                  tg_last_checked_msg_id,
                  last_consent_modified,
-                 last_arrival_in_channel
+                 last_arrival_in_channel,
+                 suggestions_frequency,
+                 last_suggestion_url_or_text,
+                 last_text_suggestion_id
                  ):
         logger.test(20026)
         id_ = TelegramParticipantId(tg_id)
@@ -161,7 +170,7 @@ class TelegramParticipant(AbstractParticipant):
 
         first_name = tg_first_name if tg_first_name is not None else ""
         last_name = tg_last_name if tg_last_name is not None else ""
-        username = "(@" + tg_username + ")" if tg_username is not None else ""
+        username = "@" + tg_username + "" if tg_username is not None else ""
         display_name = "%s %s %s" % (first_name, last_name, username)
 
         AbstractParticipant.__init__(self,
@@ -173,7 +182,10 @@ class TelegramParticipant(AbstractParticipant):
                                      date_fetched,
                                      last_checked_msg_id,
                                      last_consent_modified,
-                                     last_arrival_in_channel
+                                     last_arrival_in_channel,
+                                     suggestions_frequency,
+                                     last_suggestion_url_or_text,
+                                     last_text_suggestion_id
                                      )
 
         self.tg_specific_data = {
@@ -238,7 +250,11 @@ class TelegramParticipant(AbstractParticipant):
                        last_checked_msg_id,
                        last_consent_modified,
                        specific_data,
-                       last_arrival_in_channel) -> AbstractParticipant:
+                       last_arrival_in_channel,
+                       suggestions_frequency,
+                       last_suggestion_url_or_text,
+                       last_text_suggestion_id
+                       ) -> AbstractParticipant:
 
         tg_specific_data = json.loads(specific_data)
         try:
@@ -258,6 +274,8 @@ class TelegramParticipant(AbstractParticipant):
         date_fetched = dateutil.parser.isoparse(date_fetched)
         last_consent_modified = dateutil.parser.isoparse(last_consent_modified)
         last_arrival_in_channel = dateutil.parser.isoparse(last_arrival_in_channel)
+        if last_suggestion_url_or_text is not None:
+            last_suggestion_url_or_text = dateutil.parser.isoparse(last_suggestion_url_or_text)
 
         return TelegramParticipant(
             campain,
@@ -270,7 +288,10 @@ class TelegramParticipant(AbstractParticipant):
             date_fetched,
             tg_last_checked_msg_id,
             last_consent_modified,
-            last_arrival_in_channel
+            last_arrival_in_channel,
+            suggestions_frequency,
+            last_suggestion_url_or_text,
+            last_text_suggestion_id
         )
 
 class TelegramClientWrapper:
@@ -281,6 +302,7 @@ class TelegramClientWrapper:
             try:
                 res = self.client.connect()
             except Exception as e:
+                res = None  # todo_cr : faut bien gérer l'exception ici
                 error_logger.log(e)
             return res
 
@@ -598,7 +620,7 @@ class TelegramConnection(AbstractConnection):
         """
         logger.test(20079)
         #waiting_time = TelegramConnection._find_waiting_time(exception)
-        logger.error(s.STR_TG_TOO_MANY_INVALID.format(e.seconds, ts.__name__))
+        logger.error(s.STR_TG_TOO_MANY_INVALID.format(exception.seconds, ts.__name__))
         sys.exit()
 
     def _manage_sqlite3_errors(self, e):
@@ -678,7 +700,10 @@ class TelegramConnection(AbstractConnection):
                     now,
                     None,
                     None,
-                    now
+                    now,
+                    max(s.DEFAULT_SUGGESTIONS_FREQUENCY, s.MIN_SUGGESTION_FREQUENCY),
+                    None,
+                    None,
                 )
                 new_participants.append(new_participant)
                 # bonne nouvelle : ts.ME n'a plu besoin d'etre readable ;) !!!!!
