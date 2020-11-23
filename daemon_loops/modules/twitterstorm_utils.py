@@ -12,22 +12,22 @@ import asyncio
 MESSAGE_NOT_UNDERSTOOD_STR = \
     """🤖 Désolé, je n'ai pas compris ton message.
     
-    👉🏼 Si tu n'es plus disponible pour cette mob, envoies-moi __**STOP**__, et je me taierai.
+👉🏼 Si tu n'es plus disponible pour cette mob, envoies-moi __**STOP**__, et je me taierai.
     
-    👉🏼 Si je suis trop (ou pas assez) bavard, envoies __**FREQ 1**__, en remplaçant __**1**__ par le nombre de 
-    minutes desquelles 
-    tu veux que j'espace mes messages.
+👉🏼 Si je suis trop (ou pas assez) bavard, envoies __**FREQ 1**__, en remplaçant __**1**__ par le nombre de \
+minutes desquelles \
+tu veux que j'espace mes messages.
     
-    👉🏼 Si tu détectes un bug de mon fonctionnement (ou des fautes d'orthographe), envoies-moi __**BUG**__ suivi de 
-    la description du problème.
+👉🏼 Si tu détectes un bug de mon fonctionnement (ou des fautes d'orthographe), envoies-moi __**BUG**__ suivi de \ 
+la description du problème.
     
-    👉🏼 De ton côté, je t'invite à m'envoyer les URL des tweets que tu as postés, afin que je les propose aux \
-    autres activistes de la boucle. Je suis spécialement entraîné à reconnaître les URL des tweets (de type \
-    https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans les messages que tu m'enverras ici \ 
-    😊
+👉🏼 De ton côté, je t'invite à m'envoyer les URL des tweets que tu as postés, afin que je les propose aux \
+autres activistes de la boucle. Je suis spécialement entraîné à reconnaître les URL des tweets (de type \
+https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans les messages que tu m'enverras ici \ 
+😊
     
-    👉🏼 Si tu souhaites t'adresser à de vrais humains, tu peux poster un message dans la boucle {}.
-    """.format(s.boucle)
+👉🏼 Si tu souhaites t'adresser à de vrais humains, tu peux poster un message dans la boucle {}.
+""".format(s.boucle)
 
 
 class TwitterstormError(Exception):  # todo : arevoir
