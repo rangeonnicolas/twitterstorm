@@ -350,14 +350,16 @@ class AbstractConnection(AbstractContextManager):
         @rtype: None
         """
         logger.test(30028)
-        await self._send_message(channel, msg)
-        self._record_sent_message(participant, msg)
+        suffix = s.MSG_SUFFIX if s.MSG_SUFFIX is not None else ""
+        await self._send_message(channel, suffix + msg)
+        self._record_sent_message(participant, suffix + msg)
 
     async def send(self, participant, channel, msg, force=False, debug=False):
         """
 
         @rtype: None
         """
+
         if not s.SEND_ONLY_TO_ME:
             logger.test(30029)
             if not self.is_bot(participant):
