@@ -2,8 +2,12 @@ from asgiref.sync import sync_to_async
 
 from daemon_loops.models import SentPlannedMessage, PostedTweet
 from daemon_loops.modules.telegram import TelegramParticipant
-from daemon_loops.settings import END_LISTENING_LOOP, TIMEZONE, CAMPAIN_ID
+from daemon_loops.settings import END_LISTENING_LOOP, CAMPAIN_ID
 import datetime as dt
+import daemon_loops.settings as s
+import asyncio
+
+TIMEZONE = s.TIMEZONE
 
 DEBUT = 1.5 * 60  # en secondes
 NEW_SANDBOX_LOOP_ITERATION_EVERY = 20 * 1000
@@ -24,13 +28,23 @@ orig_tweets = ["https://twitter.com/VignonVirginie/status/1329722635572416512",
 
 import re
 
-for t in orig_tweets:
+
+@sync_to_async
+def wesh(t):  # todo_es : pas bo
     PostedTweet(campain_id=CAMPAIN_ID,
                 url=t,
                 date_received=dt.datetime.now(TIMEZONE),
                 sender_id="salut_les_gens",
                 sender_name=re.findall("twitter\.com/([^/]+)/", t)[0],
                 ).save()
+
+
+async def populate():
+    for t in orig_tweets:
+        await wesh(t)
+
+#asyncio.run(populate())
+
 
 PLANNED_MESSAGES = {
     "pm_1": {
@@ -102,13 +116,6 @@ N'hésitez pas s'il y a des choses pas claires"""}
 }
 
 
-def switch(cond):
-    return True
-
-
-def switch2(participant):
-    return (participant.last_arrival_in_channel + TIME_BEFORE_SUGGESTING) < dt.datetime.now(TIMEZONE)
-
 
 
 class SandboxParticipant(TelegramParticipant):
@@ -153,7 +160,7 @@ class SandboxParticipant(TelegramParticipant):
     @sync_to_async
     def record_planned_message(self,
                                m):  # todo_es : cette méthode devrait plutot etre dans la classe sandbox_connection (
-        # les autres aussi?)
+                                    #  les autres aussi?)
         SentPlannedMessage(
             campain_id=CAMPAIN_ID,
             planned_message_id=m['msg_id'],

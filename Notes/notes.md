@@ -11,6 +11,9 @@
 - enlever la sandbox
 - quand on relance le prog, faire en sorte de ne pas analyser les msgs de moins de 30min avant. sinon si la bdd est supprimée on réanaluse touuuuuuus les messages
 - éditer la conf
+- gestion dynamique du début et fin des suggestions
+
+- tester les paramètres START_SUGGESTING et END_SUGGESTING
 
 ### Important
 - fonction de suppression des trucs innutiles dans la BDD
@@ -23,6 +26,7 @@
 - PERF
 - FIABILITE
 - monitoring technique
+- date de début et de fin des suggestions
 
 ### Intéressant
 - tests
@@ -136,7 +140,7 @@ x nb de tweets sur twitter
 - les dumps de la BDD sqlite3
 
 
-
+ 
 
 
 

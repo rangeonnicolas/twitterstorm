@@ -8,6 +8,7 @@ import daemon_loops.settings as s
 from daemon_loops.models import PostedTweet, SentTweetUrl, SentTextSuggestion
 from daemon_loops.modules.logger import logger
 from daemon_loops.modules.message_generator import MessageGenerator
+from daemon_loops.modules.twitterstorm_utils import TwitterstormError, get_time_before_suggesting
 
 
 @sync_to_async
@@ -116,6 +117,8 @@ class AbstractParticipant:
         self.last_checked_msg_id = None
         self.set_last_checked_msg(last_checked_msg_id)
 
+        self.time_before_suggesting_if_sandbox = get_time_before_suggesting()
+
     def get_normalised_id(self) -> str:
         logger.test(30009)
         return self.id.get_normalised_id()
@@ -135,6 +138,13 @@ class AbstractParticipant:
         else:  ###
             logger.test(30013)
         self._set_last_checked_msg(last_checked_message_id)
+
+    def right_time_to_suggest_if_sandbox(self, now, time_before_suggesting):
+        if s.USE_SANDBOX :
+            time_before_suggesting = self.time_before_suggesting_if_sandbox
+        else :
+            raise TwitterstormError("On ne doit pas appeler cette méthode si USE_SANBOX = False")
+        return (self.last_arrival_in_channel + time_before_suggesting) < now
 
     def _check_id_type(self, id_) -> bool:
         raise NotImplementedError()

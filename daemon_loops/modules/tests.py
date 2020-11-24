@@ -157,13 +157,15 @@ class Recorder:
         return to_serve
 
 def run():
+    # todo_
     from daemon_loops.modules.database import DataBase
     from daemon_loops.modules.logger import logger
     from daemon_loops.modules.participants_actions import actions
     from daemon_loops.modules.telegram import TelegramConnection
-    from daemon_loops.modules.twitterstorm_utils import init, MessageAnalyser
-    import settings as s
-    import telegram_settings as ts
+    from daemon_loops.modules.twitterstorm_utils import init
+    import daemon_loops.modules.settings as s
+    import daemon_loops.modules.telegram_settings as ts
+    from daemon_loops.modules.message_analyser import MessageAnalyser
 
     init()
     db = DataBase()

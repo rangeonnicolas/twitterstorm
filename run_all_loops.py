@@ -1,11 +1,12 @@
 from suggestion_loop import main_suggestion_loop
 from listening_loop import main_listening_loop
 from daemon_loops.modules.database import DataBase
-from sandbox_loop import sandbox_loop
 from daemon_loops.modules.participants_actions import actions
 from daemon_loops.modules.telegram import TelegramConnection
-from daemon_loops.modules.twitterstorm_utils import MessageAnalyser, init
+from daemon_loops.modules.twitterstorm_utils import init, get_planned_messages_loop
+from daemon_loops.modules.message_analyser import MessageAnalyser
 import asyncio
+import daemon_loops.settings as s
 
 
 # todo_chk : assouplir les regles de filtrage par is_reachable sinon c'est incompréhensible au debuggage,
@@ -14,12 +15,14 @@ import asyncio
 
 async def loops(conn, analyser):
     a = asyncio.create_task(main_listening_loop(conn, analyser))
-    print(21993, "\nOui euh bon faudra réactuver la boucl de suggestion\n")
     b = asyncio.create_task(main_suggestion_loop(conn))
-    c = asyncio.create_task(sandbox_loop(conn))  # todo_cr : enlever sandbox
+    if s.USE_SANDBOX:
+        loop_fn = get_planned_messages_loop()
+        c = asyncio.create_task(loop_fn(conn))
     await a
     await b
-    await c
+    if s.USE_SANDBOX:
+        await c
 
 def run():
     init()

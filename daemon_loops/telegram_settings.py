@@ -1,3 +1,25 @@
+import os
+
+env = os.environ.get("TS_ENV_TYPE")
+if env is None:
+    raise Exception("Variable d'environnement TS_ENV_TYPE indéfinie")
+elif env.lower() == "dev":
+    f = 'settings_dev'
+    sets = __import__(f)
+elif env.lower() == "prod":
+    f = 'settings_prof'
+    sets = __import__(f)
+else :
+    raise Exception("La valeur de la variable d'environnement est erronée : " + env)
+print("Importé : " + f)
+
+RESTRICT_REACHABLE_USERS = sets.RESTRICT_REACHABLE_USERS
+REACHABLE_USERS = sets.REACHABLE_USERS
+
+
+
+
+
 API_ID = "1276127"
 API_HASH = "17ee6f423a60838f8f0d7e64d43de5d8"
 
@@ -12,12 +34,5 @@ TRUSTED_USER_FOR_TWEET_VALIDATION = ME
 MAIN_CHANNEL_ID = -474917106
 
 SCRIBES = []
-
-RESTRICT_REACHABLE_USERS = False
-REACHABLE_USERS = [ME]  # utilisé seulement si RESTRICT_USERS = True
-# ,"774511284","807601205","724044610","502783558","442204160","636120402"
-# ,"647781512","827840716","580065712","788660165","199961855","438966448",
-# "642928081","830495396","610265628","773136016","847535200","699208033",
-# "602696192","661135097"]
 
 NB_MSG_TO_FETCH = 40  # Seulement pour la première itération (au lancement du programme)

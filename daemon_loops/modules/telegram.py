@@ -1,6 +1,3 @@
-from daemon_loops.modules.connection import AbstractMessageId, AbstractParticipant, AbstractConnection, AbstractChannel, \
-    AbstractParticipantId, AbstractMessage
-
 import datetime as dt
 import json
 import re
@@ -25,7 +22,8 @@ from daemon_loops.modules.connection import AbstractMessageId, AbstractParticipa
     AbstractChannel, \
     AbstractParticipantId, AbstractMessage
 from daemon_loops.modules.logger import logger, error_logger
-from daemon_loops.modules.twitterstorm_utils import TwitterstormError, MessageAnalyser
+from daemon_loops.modules.twitterstorm_utils import TwitterstormError
+from daemon_loops.modules.message_analyser import MessageAnalyser
 
 
 class TelegramChannelId:
@@ -736,6 +734,7 @@ class TelegramConnection(AbstractConnection):
         Indique s'il est possible d'interragir avec un participant donné (envoi de messages, etc.).
         """
 
+        # todo_es ext_set = pas tres bo. variable d'environneemnt?
         reachable_participants = ts.REACHABLE_USERS + [ts.ME]
         # self._get_participants_new_from_channel
         reachable_participants = [TelegramParticipantId(id_).get_normalised_id() for id_ in reachable_participants]
@@ -774,7 +773,8 @@ class TelegramConnection(AbstractConnection):
         logger.test(20096)
         participants, _, _, _ = await self._get_new_participants_from_main_channel()
 
-        main_channel = await self._get_main_channel().get_tg_channel()
+        main_channel = await self._get_main_channel()
+        main_channel = main_channel.get_tg_channel()
         title = main_channel.title if main_channel is not None else "[Channel non trouvé]"
         msg = "Liste des participants du channel '{}'".format(title)
         msg += " contenant '{}':".format(search) if search is not None else ":"
@@ -803,11 +803,12 @@ class TelegramConnection(AbstractConnection):
     def run_with_async_loop(self, call):
         return self.tg_client.loop.run_until_complete(call)
 
-
-if __name__ == "__main__":  # todo_es: enlever à terme
+def run():  # todo_es: enlever à terme
     init()
     db = DataBase()
-    logger = Logger()
     conn = TelegramConnection(db).__enter__()
     analyser = MessageAnalyser(conn, actions)
-    conn._run_with_loop(conn.search_channels())
+    conn.run_with_async_loop(conn.display_participants_of_main_channel())
+
+if __name__ == "__main__":  # todo_es: enlever à terme
+    run()

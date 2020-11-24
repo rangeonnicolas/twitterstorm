@@ -2,7 +2,7 @@ import os
 
 import pytz
 
-DATA_DIR = os.path.join('daemon_loops','data')
+DATA_DIR = os.path.join('daemon_loops', 'data')
 LOG_DIR = os.path.join(DATA_DIR, "log")
 SESSION_DIR = os.path.join(DATA_DIR, "sessions")
 

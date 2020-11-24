@@ -5,7 +5,8 @@ from daemon_loops.modules.database import DataBase
 from daemon_loops.modules.logger import logger
 from daemon_loops.modules.participants_actions import actions
 from daemon_loops.modules.telegram import TelegramConnection
-from daemon_loops.modules.twitterstorm_utils import init, MessageAnalyser
+from daemon_loops.modules.twitterstorm_utils import init
+from daemon_loops.modules.message_analyser import MessageAnalyser
 import asyncio
 
 async def main_listening_loop(conn, analyser):

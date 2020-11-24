@@ -8,11 +8,6 @@ from daemon_loops.modules.logger import logger
 from daemon_loops.modules.telegram import TelegramConnection
 from daemon_loops.modules.twitterstorm_utils import init
 
-sandbox = True  # todo_cr
-if sandbox:
-    from daemon_loops.modules.sandbox import switch, switch2
-
-
 # todo_es : il n'est pas dit que d'autres applis (ex whatsapp) necessite le 1to1channel pour envoyer
 #  un message. ainsi, la forme participant_info = {'participant': , '1to1_channel': } doit être inconnue du fichier
 #  connection.py et encapsulée par le fichier telegram.py, ou bien le 1to1 channel peut même être un attribut de la
@@ -33,8 +28,7 @@ async def main_suggestion_loop(conn):
         logmsg = "\tNouvelle itération de la boucle de suggestions ({})".format(now)
         logger.write(logmsg)
 
-        if switch(  # todo_cr jarter le switch
-                now >= s.START_SUGGESTIONS and now <= s.END_SUGGESTIONS):
+        if s.USE_SANDBOX or (s.START_SUGGESTIONS <= now <= s.END_SUGGESTIONS):
             # todo_f : faire en sorte que ce soit
             #  dynmique le start et end (genre c'est le scribe qui envoie des signaux)
 
@@ -47,9 +41,9 @@ async def main_suggestion_loop(conn):
 
                 if not conn.is_bot(participant) and not participant.is_scribe():
 
-                    if switch2(participant):  # todo_cr : jarter le switch
+                    now = dt.datetime.now(s.TIMEZONE)
 
-                        now = dt.datetime.now(s.TIMEZONE)
+                    if (not s.USE_SANDBOX) or participant.right_time_to_suggest_if_sandbox(now):
 
                         delta = dt.timedelta(0, 60 * participant.suggestions_frequency)
                         if participant.last_suggestion_url_or_text is None or (

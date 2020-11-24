@@ -6,6 +6,9 @@ CLIENT = "Telegram"
 
 CAMPAIN_ID = "TwitterStrorm_2"
 
+USE_SANDBOX = True  # todo_cr
+SANDBOX_MODULE_NAME = 'sandbox_loop'
+
 NEW_LISTENING_LOOP_ITERATION_EVERY = 2 * 1000  # En milisecondes
 CHECK_NEW_PARTICIPANTS_EVERY = 5 * 1000  # En milisecondes
 NEW_SUGGESTION_LOOP_ITERATION_EVERY = 4 * 1000  # En milisecondes
@@ -23,6 +26,11 @@ END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 60 * 60)  # tod
 END_SUGGESTION_LOOP = END_LISTENING_LOOP  # todo_es : à merger
 START_SUGGESTIONS = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 5)  # todo_cr a changer
 END_SUGGESTIONS = END_LISTENING_LOOP  # todo_cr a changer
+
+# note : en mode sandbox, ces paramètres ne sont pas pris en compte
+START_SUGGESTIONS = dt.datetime.now(TIMEZONE) # todo_cr mettre à 10h le jour J
+END_SUGGESTIONS = END_LISTENING_LOOP
+
 
 URL_SUGGESTION_MSG_STR = """🤖 Voici un tweet posté par un·e autre activiste (__**{}**__).
 
