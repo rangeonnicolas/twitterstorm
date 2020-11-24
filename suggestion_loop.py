@@ -13,9 +13,8 @@ if sandbox:
     from daemon_loops.modules.sandbox import switch, switch2
 
 
-# todo : todo_refactoring : il n'est pas dit que d'autres applis (ex whatsapp) necessite le 1to1channel pour envoyer
-#  un message.
-# todo : ... ainsi, la forme participant_info = {'participant': , '1to1_channel': } doit être inconnue du fichier
+# todo_es : il n'est pas dit que d'autres applis (ex whatsapp) necessite le 1to1channel pour envoyer
+#  un message. ainsi, la forme participant_info = {'participant': , '1to1_channel': } doit être inconnue du fichier
 #  connection.py et encapsulée par le fichier telegram.py, ou bien le 1to1 channel peut même être un attribut de la
 #  classe TelegramParticipant.
 
@@ -25,7 +24,7 @@ async def main_suggestion_loop(conn):
     last_loop_execution = dt.datetime(1970, 1, 1, tzinfo=s.TIMEZONE)
     last_new_participants_check = now
 
-    #participants_info = await conn.check_for_new_participants_in_main_channel(first_time=True)
+    # participants_info = await conn.check_for_new_participants_in_main_channel(first_time=True)
 
     while now < s.END_SUGGESTION_LOOP:
         last_loop_execution = await wait_for_next_iteration(last_loop_execution, s.NEW_SUGGESTION_LOOP_ITERATION_EVERY)
@@ -34,9 +33,10 @@ async def main_suggestion_loop(conn):
         logmsg = "\tNouvelle itération de la boucle de suggestions ({})".format(now)
         logger.write(logmsg)
 
-        if switch(
-                now >= s.START_SUGGESTIONS and now <= s.END_SUGGESTIONS):  # todo : faire en sorte que ce soit
-            # dynmiques le start et end (genre c'est le scribe qui envoie des signaux)
+        if switch(  # todo_cr jarter le switch
+                now >= s.START_SUGGESTIONS and now <= s.END_SUGGESTIONS):
+            # todo_f : faire en sorte que ce soit
+            #  dynmique le start et end (genre c'est le scribe qui envoie des signaux)
 
             participants_info = await conn.fetch_all_participants()
 
@@ -47,7 +47,7 @@ async def main_suggestion_loop(conn):
 
                 if not conn.is_bot(participant) and not participant.is_scribe():
 
-                    if switch2(participant):
+                    if switch2(participant):  # todo_cr : jarter le switch
 
                         now = dt.datetime.now(s.TIMEZONE)
 
@@ -65,7 +65,7 @@ async def main_suggestion_loop(conn):
                             participants_info[j]['participant'] = updated_participant
 
     if now >= s.END_SUGGESTION_LOOP:
-        print("La date de fin spécifiée est antérieure à la date actuelle.")  # todo : difféencier les différentes boucles dans le message
+        print("La date de fin spécifiée est antérieure à la date actuelle.")
 
 def run():
     init()

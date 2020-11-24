@@ -6,19 +6,19 @@ from asgiref.sync import sync_to_async
 
 import daemon_loops.settings as s
 from daemon_loops.models import PostedTweet, SentTweetUrl, SentTextSuggestion
-from daemon_loops.modules.logger import logger  # todo : revoir
+from daemon_loops.modules.logger import logger
 from daemon_loops.modules.message_generator import MessageGenerator
 
 
 @sync_to_async
 def quickfix3(**kwargs):
-    SentTweetUrl(  # todo : a déplacer dans la classe BDD
+    SentTweetUrl(  # todo_es : a déplacer dans la classe BDD
         **kwargs
     ).save()
 
 
 @sync_to_async
-def quixkfix(**kwargs):  # todo : pas bo
+def quixkfix(**kwargs):
     SentTextSuggestion(**kwargs).save()
 
 
@@ -233,9 +233,9 @@ class AbstractConnection(AbstractContextManager):
         future = new_participants_info + known_participants_info
 
         return await self._format_participants_info(self._get_db_participants())
-        # todo_f: en vrai on peut optimiser un peu en n'allant pas tout rechercher dans la BDD hein
-        # todo_f : si on enleve cette ligne, plus jamais on ne va fetcher les participants
-        #  todo_f : dans la BDD, sauf à l'ilitialisation du prog, enfin si tu le programme un jour... :s
+        # todo_op: en vrai on peut optimiser un peu en n'allant pas tout rechercher dans la BDD hein
+        # todo_chk : si on enleve cette ligne, plus jamais on ne va fetcher les participants
+        # dans la BDD, sauf à l'ilitialisation du prog, enfin si tu le programme un jour... :s
 
 
     async def _check_me(self, me):
@@ -247,8 +247,9 @@ class AbstractConnection(AbstractContextManager):
                 self.my_channel = await self._get_1to1_channel(me)
             else:
                 logger.test(30019)
-                if s.SEND_ONLY_TO_ME:  # todo : vérifier l'utilité d'avoir un utilisateur ME si send_only_to_me = False.
-                    # todo : Si pas utile, décaler le if s.SEND_ONLY_TO_ME avant l'appel de la méthode _check_me
+                if s.SEND_ONLY_TO_ME:
+                    # todo_chk : vérifier l'utilité d'avoir un utilisateur ME si send_only_to_me = False.
+                    # todo_chk : Si pas utile, décaler le if s.SEND_ONLY_TO_ME avant l'appel de la méthode _check_me
                     raise Exception("Attention, le compte de test ME doit être présent dans le channel dédié à la " +
                                     "twitterstorm si SEND_ONLY_TO_ME = True")
         else:  ###
@@ -275,7 +276,7 @@ class AbstractConnection(AbstractContextManager):
 
             if not self.is_bot(participant):
 
-                if participant.is_scribe():  # todo_f : ce fonctionnement n'est pas du=ynamique : on ne peut pas ajouter des scribes en cours de route
+                if participant.is_scribe():
                     for m in s.GOODBYE_SCRIBE_MSGS:
                         await self.send(participant, channel, m)
                 else:
@@ -303,7 +304,7 @@ class AbstractConnection(AbstractContextManager):
                                          'msg': message.message_str,
                                          'received_at': message.received_at,
                                          'processed_at': dt.datetime.now(s.TIMEZONE),
-                                         'detected': None,  # todo : c'est quoi ça ?
+                                         'detected': None,  # todo_chk : c'est quoi ça ?
                                          "action_token": action}])
 
     def _get_db_participants(self, consent=None):
@@ -390,8 +391,8 @@ class AbstractConnection(AbstractContextManager):
         logger.test(30035)
         msgs, updated_participant = await self._get_messages(channel, participant)
         self.db.update_last_checked_msg(updated_participant)
-        # todo : ici on fait 1 appel à la bdd
-        # todo : pour chaque participant, pourquoi ne pas tout faire en meme temps?
+        # todo_op : ici on fait 1 appel à la bdd
+        #  pour chaque participant, pourquoi ne pas tout faire en meme temps?
         msgs = self._filter_messages_from_participant_to_bot(msgs, updated_participant)
         return msgs, updated_participant
 
@@ -435,7 +436,7 @@ class AbstractConnection(AbstractContextManager):
                        text_id=text_id,
                        sent_at=dt.datetime.now(s.TIMEZONE),
                        receiver_id=participant.get_normalised_id(),
-                       sent_text=text)  # todo : pas bo
+                       sent_text=text)  # todo_es : pas bo
 
         return participant, True
 
@@ -469,7 +470,7 @@ class AbstractConnection(AbstractContextManager):
 
     def _format_text_suggestion_mesage(self, text):
         # Le message 'text' doit être dans un message bien distinct, afin de pouvoir facilement le copier-coller
-        return [s.TEXT_SUGGESTION_MSG_STR, text]  # todo : l'inclure directement dans une url tweetable
+        return [s.TEXT_SUGGESTION_MSG_STR, text]
 
     def connect(self):
         """

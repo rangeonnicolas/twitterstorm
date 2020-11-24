@@ -7,11 +7,16 @@ from daemon_loops.modules.telegram import TelegramConnection
 from daemon_loops.modules.twitterstorm_utils import MessageAnalyser, init
 import asyncio
 
+
+# todo_chk : assouplir les regles de filtrage par is_reachable sinon c'est incompréhensible au debuggage,
+#  notamment dans _get_participants_from_channel
+# todo_es : renommer les noms des fichiers qui st en francais
+
 async def loops(conn, analyser):
     a = asyncio.create_task(main_listening_loop(conn, analyser))
-    print(21993,"\nOui euh bon faudra réactuver la boucl de suggestion\n")
+    print(21993, "\nOui euh bon faudra réactuver la boucl de suggestion\n")
     b = asyncio.create_task(main_suggestion_loop(conn))
-    c = asyncio.create_task(sandbox_loop(conn))  # todo_critical : enlever sandbox
+    c = asyncio.create_task(sandbox_loop(conn))  # todo_cr : enlever sandbox
     await a
     await b
     await c

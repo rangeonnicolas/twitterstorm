@@ -34,7 +34,9 @@ async def sandbox_loop(conn):
                     await participant.record_planned_message(m)
 
     if now >= s.END_SANDBOX_LOOP:
-        print("La date de fin spécifiée est antérieure à la date actuelle.")  # todo : difféencier les différentes boucles dans le message
+        print(
+            "La date de fin spécifiée est antérieure à la date actuelle.")  # todo_es : difféencier les différentes
+        # boucles dans le message
 
 def run():
     init()

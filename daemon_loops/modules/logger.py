@@ -3,7 +3,7 @@ import os
 import daemon_loops.modules.advanced_settings as s
 
 
-# todo : a mettre utrepart quand on aura résolu la question du logger (on le met ici à cause de circular imports)
+# todo_es : a mettre utrepart quand on aura résolu la question du logger (on le met ici à cause de circular imports)
 def create_dirs_if_not_exists(dirs_list):
     for dir_ in dirs_list:
         if not os.path.exists(dir_):
@@ -57,5 +57,5 @@ class Logger:
 logger = Logger()
 error_logger = ErrorLogger()
 
-if __name__ == "__main__":  # todo : aretirer
+if __name__ == "__main__":  # todo_es : aretirer
     Logger()._generate_ints()

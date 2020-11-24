@@ -329,8 +329,8 @@ class DataBase:
         self._execute(queries)
 
     def update_participant_consent(self, p, is_ok):
-        p.is_ok = is_ok  # todo : ouais c'est un peu chelou de modifier p dans la classe DATABASE...
-        # todo : je pense qqu'on a pas besoin de last_consent_modified
+        p.is_ok = is_ok  # todo_chk : ouais c'est un peu chelou de modifier p dans la classe DATABASE...
+        # todo_chk : je pense qqu'on a pas besoin de last_consent_modified
         now = dt.datetime.now(s.TIMEZONE)
         q = ('UPDATE participant SET is_ok = ?, last_consent_modified = ?  WHERE normalised_id = ? and campain = ?',
              (is_ok, now, p.get_normalised_id(), s.CAMPAIN_ID))
@@ -357,4 +357,4 @@ class DataBase:
 
     def _dump(self):
         copyfile(self.db_file,
-                 re.sub('.db$', '', self.db_file) + str(dt.datetime.now(s.TIMEZONE)) + '.db')  # todo : wowowow!
+                 re.sub('.db$', '', self.db_file) + str(dt.datetime.now(s.TIMEZONE)) + '.db')  # todo_chk

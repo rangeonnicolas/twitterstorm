@@ -30,18 +30,18 @@ https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans l
 """.format(s.boucle)
 
 
-class TwitterstormError(Exception):  # todo : arevoir
+class TwitterstormError(Exception):  # todo_es : arevoir
     def __init__(self, message, prefix="- ERREUR :  "):
         os.system('cls')  # Windows
         os.system('clear')  # Linux, Mac
         super().__init__(message)
-        print("\n\n")  # todo
+        print("\n\n")
         print(prefix + message)
         print("\n" * 10 + "Aide au debuggage :\n")
         logger.test(10000)
 
 
-class TwitterstormSettingsError(TwitterstormError):  # todo: a exploiter
+class TwitterstormSettingsError(TwitterstormError):
     def __init__(self, message, file):
         logger.test(10001)
         super().__init__(message, prefix="- ERREUR DANS LE FICHIER DE CONFIGURATION '{}.py':  ".format(file.__name__))
@@ -56,10 +56,10 @@ async def wait_for_next_iteration(last_loop_execution, time_between_two_iteratio
         await asyncio.sleep(remaining_time.total_seconds())
     return dt.datetime.now(s.TIMEZONE)
 
-def init():  # todo: affiahcer tout le chargement des données
-    # todo: envoyer une message au scribe pour lui dire de pas faire de la merde
-    # todo: vérifier aussi, en cas de relancement d el'appli après plantage, qu'il n'y a pas d'actions
-    # en attente (ex: le scribe a un message qu'il n'a pas validé)
+
+def init():  # todo_f: affichcer dans les logs un résumé du chargement des données
+    # todo_chk: vérifier aussi, en cas de relancement d el'appli après plantage, qu'il n'y a pas d'actions
+    #  en attente (ex: le scribe a un message qu'il n'a pas validé)
     logger.test(10002)
     create_dirs_if_not_exists([s.DATA_DIR, s.LOG_DIR, s.SESSION_DIR])
 
@@ -87,7 +87,7 @@ class MessageAnalyser:
 
                 logmsg = "ACTION : " + participant.get_normalised_id() + "\t" + message.message_str + "\t" + \
                          action_name  #
-                # todo: ce message n'est pas très compréhensible
+                # todo_es: ce message n'est pas très compréhensible
                 logger.debug(logmsg)
 
                 if answer is not None:
@@ -96,8 +96,8 @@ class MessageAnalyser:
                     await self.conn.send(participant, channel, answer, force=True)
 
                 self.conn.save_request_from_participant(message, action_name,
-                                                        participant)  # todo: il y a peut-être plus d'arguments à
-                # todo : enregistrer en BDD que ça
+                                                        participant)
+                # todo_chk : il y a peut-être plus d'arguments à enregistrer en BDD que ça
 
                 action_fn = sync_to_async(action_fn)
                 participant = await action_fn(participant, channel, self.conn, message)
@@ -124,11 +124,11 @@ class MessageAnalyser:
 
     async def analyse_message_from_scribe(self, message, participant, scribe_channel, participants_info):
         for action_name, action_conf in self.actions.items():
-            if action_name not in ["tweet_received"]:  # todo : c'est bof beau..
+            if action_name not in ["tweet_received"]:  # todo_es : c'est bof beau..
                 if self.participant_has_requested_an_action(action_conf, message, participant):
                     logger.test(10011)
                     answer = "Attention, vous êtes scribe. L'action '%s' n'est donc pas disponible pour vous." \
-                             % action_name  # todo : faire attention à ce que action_name soit compréhensible par le
+                             % action_name  # todo_f : faire attention à ce que action_name soit compréhensible par le
                     # scribe... :s
                     await self.conn.send(participant, scribe_channel, answer)
                     return participant
@@ -143,9 +143,5 @@ class MessageAnalyser:
         answer = "Comme vous êtes enregistré.e comme scribe, votre message a été transféré à %i participants" \
                  % nb_participants
         await self.conn.send(participant, scribe_channel, answer)
-        # todo : on ne emanderait pas une validation par hasard? Avec un système de message en attente et 2 min pour
-        # confirmer avec le mot clé "#banlancelasauce"
-        # Si 2 messages ont été soumis en moins de 2 minutes, bien préciser à la recetion
-        # du 2nd message que le précédent est annulé ;)
 
-        return participant  # todo : utile ? participant est il updaté à un moment?
+        return participant  # todo_chk : utile ? participant est il updaté à un moment?

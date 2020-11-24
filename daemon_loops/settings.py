@@ -1,5 +1,5 @@
 import datetime as dt
-from daemon_loops.modules.advanced_settings import *  # todo utiliser une autre méthode
+from daemon_loops.modules.advanced_settings import *  # todo_es utiliser une autre méthode
 from daemon_loops.modules.advanced_settings import TIMEZONE
 
 CLIENT = "Telegram"
@@ -7,11 +7,11 @@ CLIENT = "Telegram"
 CAMPAIN_ID = "TwitterStrorm_2"
 
 NEW_LISTENING_LOOP_ITERATION_EVERY = 2 * 1000  # En milisecondes
-CHECK_NEW_PARTICIPANTS_EVERY = 5 * 1000  # En milisecondes  # todo_crit : pas mettre 20!
+CHECK_NEW_PARTICIPANTS_EVERY = 5 * 1000  # En milisecondes
 NEW_SUGGESTION_LOOP_ITERATION_EVERY = 4 * 1000  # En milisecondes
 
 DEFAULT_SUGGESTIONS_FREQUENCY = 1.2  # En minutes
-MIN_SUGGESTION_FREQUENCY = 0.5  # todo : a changer !
+MIN_SUGGESTION_FREQUENCY = 0.5  # En minutes
 
 DEFAULT_CONSENT = True
 DEFAULT_TWEET_VALIDATION = False
@@ -20,7 +20,7 @@ SEND_ONLY_TO_ME = False
 
 # END_LISTENING_LOOP = dt.datetime(2020,5,24,8,0,0,tzinfo=s.TIMEZONE)
 END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 60 * 60)  # todo_cr a changer
-END_SUGGESTION_LOOP = END_LISTENING_LOOP  # todo: à merger
+END_SUGGESTION_LOOP = END_LISTENING_LOOP  # todo_es : à merger
 START_SUGGESTIONS = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 5)  # todo_cr a changer
 END_SUGGESTIONS = END_LISTENING_LOOP  # todo_cr a changer
 
@@ -36,7 +36,7 @@ TEXT_SUGGESTION_MSG_STR = """🤖 Voici un message que tu peux copier-coller dan
 Pour générer à nouveau ce message, mais en ciblant un·e autre député·e, réponds-moi __**AUTRE**__.
 """
 
-# todo : pas à la bonne place
+# todo_es : pas à la bonne place
 invite_link = "https://t.me/joinchat/I-xqAEUulztdUOz-RTsOdQ"
 animateurices = "Johanna et Matthieu"
 boucle = '[DEMO] 🛒 surprod - comm Interpellation'

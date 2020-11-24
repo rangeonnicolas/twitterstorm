@@ -11,7 +11,7 @@ def insert_posted_tweet(p, channel, conn, m):
                 date_received=dt.datetime.now(s.TIMEZONE),
                 sender_id=p.get_normalised_id(),
                 sender_name=p.display_name,
-                ).save()  # todo : faire un dédoublonnage? et une normalisation d'url (enlever les arguments GET)
+                ).save()
 
     return p
 
@@ -71,7 +71,6 @@ async def send_other_suggestion(participant, channel, conn, message):
         await conn.send_suggestion(participant, channel, text_id=participant.last_text_suggestion_id, force=True)
     return participant
 
-
 actions = {
     'stop': {
         'name': 'STOP',
@@ -106,9 +105,9 @@ actions = {
     'report_bug': {
         'name': 'SIGNALER UN BUG',
         'test_func': lambda message_str, p: "bug" == format_participant_message(message_str)[:3],
-        # todo : pas très élégant
+        # todo_es : pas très élégant le [:3]
         'answer': "🤖 Merci pour ce signalement de bug.\nJe le transmet de ce pas !",
-        'action_func': lambda p, c, conn, m: p  # todo à faire
+        'action_func': lambda p, c, conn, m: p
     },
     'other_formulation': {
         'name': 'DEMANDER UNE AUTRE FORMULATION POUR CE TWEET',

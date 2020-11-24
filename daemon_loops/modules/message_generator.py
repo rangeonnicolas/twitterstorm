@@ -28,7 +28,7 @@ class MessageGenerator:
         try:
             res = random.choice(possible_messages[0])
         except IndexError:
-            # todo : signaler à l'utilisateur que c'est la merde
+            # todo_f : signaler à l'utilisateur que c'est la merde
             res = ""
         return res
 

@@ -222,7 +222,7 @@ class TelegramParticipant(AbstractParticipant):
         logger.test(20034)
         return TelegramMessageId.from_normalised_id_to_tg_id(
             self.last_checked_msg_id.get_normalised_id()) if self.last_checked_msg_id is not None else None
-        # todo : j'ai l'impression que c'est dégeu mais j'en suis pas sur
+        # todo_chk : j'ai l'impression que c'est dégeu mais j'en suis pas sur
 
     def is_scribe(self):
         logger.test(20035)
@@ -232,7 +232,8 @@ class TelegramParticipant(AbstractParticipant):
         logger.test(20036)
         return self.tg_specific_data
 
-    def is_trusted_participant_for_tweets(self) -> bool:  # todo : voir si on veut garder cette feature
+    def is_trusted_participant_for_tweets(self) -> bool:
+        # todo_chk : voir si on veut garder cette feature
         logger.test(20037)
         return True
 
@@ -406,7 +407,7 @@ class TelegramConnection(AbstractConnection):
             self._manage_sqlite3_errors(e)
 
         self.tg_client.loop.run_until_complete(self._user_authentification())
-        return self  # todo: on peut encore séparer le context manager de toutes les autres méthodes
+        return self
 
     def disconnect(self, exc_type, exc_value, traceback):
         """
@@ -445,7 +446,8 @@ class TelegramConnection(AbstractConnection):
                 channel = await self.tg_client.get_input_entity("@" + participant.tg_username)
             except ValueError:
                 logger.test(20052)
-                return TelegramChannel(None)  # todo: gérer le cas où channel = None dans les fonctions appelant _get_1to1_channel
+                return TelegramChannel(
+                    None)  # todo_chk: gérer le cas où channel = None dans les fonctions appelant _get_1to1_channel
         except Exception:
             return TelegramChannel(None)
         return TelegramChannel(channel)
@@ -477,8 +479,8 @@ class TelegramConnection(AbstractConnection):
 
     def _get_participant_class(self):
         logger.test(20056)
-        return TelegramParticipant  # todo : en fait non. créer une méthode dans TelegramConnection appelée
-        # create_participant, puis dans database.py>get_users, remplacer participant_class par conn.create_participant
+        return TelegramParticipant  # todo_es : en fait non. créer une méthode dans TelegramConnection appelée
+        #  create_participant, puis dans database.py>get_users, remplacer participant_class par conn.create_participant
 
     async def _get_messages(self, channel, participant):
         last_checked_message_tg_id = participant.get_last_checked_msg_tg_id()
@@ -512,7 +514,6 @@ class TelegramConnection(AbstractConnection):
         Retourne un channel Télégramme à partir de son identifiant
         @return: TelegramChannel
         """
-        # todo_critical : vérifier si on n'a pas des raise TwitterstormException non catchées
 
         unknown_channel_msg = 'L\'identifiant du channel demandé ({}) est inconnu'.format(tg_channel_id.get_tg_id())
         try:
@@ -658,9 +659,9 @@ class TelegramConnection(AbstractConnection):
         me = None
 
         # db_participants_id = self.db.get_all_participants_origids(TelegramParticipant)
-        # todo : du coup la méthode db.get_all_participants_origids devient innutile
-        # todo : bon pas ici mais faire en sorte que db.get_participants soit un itérable pour pas
-        # todo : tout charger d'un coup
+        # todo_op : du coup la méthode db.get_all_participants_origids devient innutile
+        #  bon pas ici mais faire en sorte que db.get_participants soit un itérable pour pas
+        #  tout charger d'un coup
 
         if first_time:
             logger.test(20082)
@@ -712,7 +713,7 @@ class TelegramConnection(AbstractConnection):
             else:
                 logger.test(20086)
 
-        # todo : vérifier utilité d'un ME si pas selnd_only_to_me. Sinon, mettre if SEND_ONLY_TO_ME ici
+        # todo_es : vérifier utilité d'un ME si pas selnd_only_to_me. Sinon, mettre if SEND_ONLY_TO_ME ici
         for p in new_participants + participants_still_in_the_channel + participants_who_left:
             if p.get_tg_id() == ts.ME:
                 logger.test(20087)
@@ -757,7 +758,7 @@ class TelegramConnection(AbstractConnection):
         channels = await self._get_all_channels()
         filtered_channels = [ch for ch in channels if string is None or string.lower() in ch['title'].lower()]
         print("Liste des channels {}:".format("contenant '{}'".format(string) if string is not None else ""))
-        # todo: print console, pas dans le logger
+        # Note laisser en print pour un affichage console
 
         for ch in filtered_channels:
             logger.test(20095)
@@ -777,7 +778,7 @@ class TelegramConnection(AbstractConnection):
         title = main_channel.title if main_channel is not None else "[Channel non trouvé]"
         msg = "Liste des participants du channel '{}'".format(title)
         msg += " contenant '{}':".format(search) if search is not None else ":"
-        print(msg)  # todo: console, pas dans le logger
+        print(msg)  # Laisser le print pour un affichage console
 
         for p in participants:
             logger.test(20097)
@@ -803,11 +804,10 @@ class TelegramConnection(AbstractConnection):
         return self.tg_client.loop.run_until_complete(call)
 
 
-if __name__ == "__main__":  # todo: enlever à terme
+if __name__ == "__main__":  # todo_es: enlever à terme
     init()
     db = DataBase()
     logger = Logger()
     conn = TelegramConnection(db).__enter__()
     analyser = MessageAnalyser(conn, actions)
     conn._run_with_loop(conn.search_channels())
-
