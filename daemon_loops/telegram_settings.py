@@ -4,10 +4,10 @@ env = os.environ.get("TS_ENV_TYPE")
 if env is None:
     raise Exception("Variable d'environnement TS_ENV_TYPE indéfinie")
 elif env.lower() == "dev":
-    f = 'settings_dev'
+    f = 'settings_tg_dev'
     sets = __import__(f)
 elif env.lower() == "prod":
-    f = 'settings_prof'
+    f = 'settings_tg_prod'
     sets = __import__(f)
 else :
     raise Exception("La valeur de la variable d'environnement est erronée : " + env)

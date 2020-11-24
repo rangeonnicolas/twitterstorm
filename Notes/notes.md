@@ -6,12 +6,11 @@
 - Mode Scribe
 - Pourvoir brancher la boucle sans envoyer de message d'accueil à tout le monde
 - gestion des Exceptions (CTRL+F 'raise', tg_client, compte tg DEV, au sein des itérations de la boucle)
-- relecture complète de code
-- todo_cr
-- enlever la sandbox
 - quand on relance le prog, faire en sorte de ne pas analyser les msgs de moins de 30min avant. sinon si la bdd est supprimée on réanaluse touuuuuuus les messages
-- éditer la conf
 - gestion dynamique du début et fin des suggestions
+- éditer la conf
+- todo_cr
+- relecture complète de code
 
 - tester les paramètres START_SUGGESTING et END_SUGGESTING
 

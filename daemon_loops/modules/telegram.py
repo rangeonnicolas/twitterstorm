@@ -776,8 +776,11 @@ class TelegramConnection(AbstractConnection):
         main_channel = await self._get_main_channel()
         main_channel = main_channel.get_tg_channel()
         title = main_channel.title if main_channel is not None else "[Channel non trouvé]"
-        msg = "Liste des participants du channel '{}'".format(title)
+        msg = "\nListe des participants du channel '{}'".format(title)
         msg += " contenant '{}':".format(search) if search is not None else ":"
+        if ts.RESTRICT_REACHABLE_USERS :
+            msg += "\n\n! ATTENTION :\nDans le fichier de configuration, RESTRICT_REACHABLE_USERS " \
+            "est à True, ce qui restreint les utilisateurs affichés ici.\n"
         print(msg)  # Laisser le print pour un affichage console
 
         for p in participants:

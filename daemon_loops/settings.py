@@ -1,8 +1,27 @@
+import os
+
+env = os.environ.get("TS_ENV_TYPE")
+if env is None:
+    raise Exception("Variable d'environnement TS_ENV_TYPE indéfinie")
+elif env.lower() == "dev":
+    f = 'settings_dev'
+    sets = __import__(f)
+elif env.lower() == "prod":
+    f = 'settings_prod'
+    sets = __import__(f)
+else :
+    raise Exception("La valeur de la variable d'environnement est erronée : " + env)
+print("Importé : " + f)
+
+MSG_SUFFIX = sets.MSG_SUFFIX
+
+
+
 import datetime as dt
 from daemon_loops.modules.advanced_settings import *  # todo_es utiliser une autre méthode
 from daemon_loops.modules.advanced_settings import TIMEZONE
 
-CLIENT = "Telegram"
+CLIENT = "Telegram"  # todo_es : variable encore utlisée ?
 
 CAMPAIN_ID = "TwitterStrorm_2"
 
