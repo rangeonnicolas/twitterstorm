@@ -5,7 +5,7 @@ from daemon_loops.modules.telegram import TelegramParticipant
 from daemon_loops.settings import END_LISTENING_LOOP, TIMEZONE, CAMPAIN_ID
 import datetime as dt
 
-DEBUT = 1.5 * 60  # en secondes # todo : remetre à 2*60
+DEBUT = 1.5 * 60  # en secondes
 NEW_SANDBOX_LOOP_ITERATION_EVERY = 20 * 1000
 END_SANDBOX_LOOP = END_LISTENING_LOOP
 MESSAGE_EXPIRATION = 2 * 60  # En secondes. Définit le délai au dlà duquel il esyt trop tard pour envoyer un planned
@@ -30,7 +30,7 @@ for t in orig_tweets:
                 date_received=dt.datetime.now(TIMEZONE),
                 sender_id="salut_les_gens",
                 sender_name=re.findall("twitter\.com/([^/]+)/", t)[0],
-                ).save()  # todo : faire un dédoublonnage? et une normalisation d'url (enlever les arguments GET)
+                ).save()
 
 PLANNED_MESSAGES = {
     "pm_1": {
@@ -128,13 +128,12 @@ class SandboxParticipant(TelegramParticipant):
             it_is_a_bit_too_late_to_send_it = when_to_send_the_message + dt.timedelta(0, MESSAGE_EXPIRATION)
 
             if when_to_send_the_message < now and now < it_is_a_bit_too_late_to_send_it:
-                if not await self._check_if_already_sent(message_id):  # todo : attention à bien checker qu'il a déjà
-                    # été envoyé APRES le last_arrival, car il a peut etre été envoyé avant, puis il est parti de la boucle puis revenu :)
+                if not await self._check_if_already_sent(message_id):
                     message = "🗣 __**%s (animateur·ice de la mob.), vient de t'envoyer un message :**__\n\n%s" % (
-                    sender, message_txt)
+                        sender, message_txt)
                     to_send.append({
-                        'msg_id' : message_id,
-                        'message' : message,
+                        'msg_id': message_id,
+                        'message': message,
                     })
 
         return to_send
@@ -152,11 +151,13 @@ class SandboxParticipant(TelegramParticipant):
         return len(objs) >= 1
 
     @sync_to_async
-    def record_planned_message(self, m):  # todo : cette méthode devrait plutot etre dans la classe sandbox_connection (les autres aussi?)
+    def record_planned_message(self,
+                               m):  # todo_es : cette méthode devrait plutot etre dans la classe sandbox_connection (
+        # les autres aussi?)
         SentPlannedMessage(
-            campain_id = CAMPAIN_ID,
-            planned_message_id = m['msg_id'],
-            sent_at = dt.datetime.now(TIMEZONE),
-            receiver_id = self.get_normalised_id(),  # todo : a transformer en foreign key quand on pourra
-            sent_text = m['message']
+            campain_id=CAMPAIN_ID,
+            planned_message_id=m['msg_id'],
+            sent_at=dt.datetime.now(TIMEZONE),
+            receiver_id=self.get_normalised_id(),  # todo_es : a transformer en foreign key quand on pourra
+            sent_text=m['message']
         ).save()
