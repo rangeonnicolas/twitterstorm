@@ -4,12 +4,13 @@ from contextlib import AbstractContextManager
 
 from asgiref.sync import sync_to_async
 
-import daemon_loops.settings as s
+import settings as s
 from daemon_loops.models import PostedTweet, SentTweetUrl, SentTextSuggestion
-from daemon_loops.modules.logger import logger
+import daemon_loops.modules.logging as logging
 from daemon_loops.modules.message_generator import MessageGenerator
 from daemon_loops.modules.twitterstorm_utils import TwitterstormError, get_time_before_suggesting
 
+logging.info(s.INIT_MSG_TO_LOG)
 
 @sync_to_async
 def quickfix3(**kwargs):
@@ -40,25 +41,25 @@ class AbstractChannelId:
 
 class AbstractParticipantId:
     def get_normalised_id(self) -> str:
-        logger.test(30000)
+        logging.test(30000)
         raise NotImplementedError()
 
 
 class AbstractMessageId:
     def get_normalised_id(self) -> str:
-        logger.test(30001)
+        logging.test(30001)
         raise NotImplementedError()
 
 
 class AbstractChannel:
     def get_specific_data(self) -> dict:
-        logger.test(30002)
+        logging.test(30002)
         raise NotImplementedError()
 
 
 class AbstractMessage:
     def __init__(self, id_, message_str, received_at, sender_id):
-        logger.test(30003)
+        logging.test(30003)
         self._check_id_type(id_)
         self._check_sender_id_type(sender_id)
 
@@ -68,19 +69,19 @@ class AbstractMessage:
         self.sender_id = sender_id
 
     def _check_id_type(self, id_) -> bool:
-        logger.test(30004)
+        logging.test(30004)
         raise NotImplementedError()
 
     def _check_sender_id_type(self, sender_id) -> bool:
-        logger.test(30005)
+        logging.test(30005)
         raise NotImplementedError()
 
     def get_normalised_sender_id(self) -> str:
-        logger.test(30006)
+        logging.test(30006)
         return self.sender_id.get_normalised_id()
 
     def get_normalised_id(self) -> str:
-        logger.test(30007)
+        logging.test(30007)
         return self.id.get_normalised_id()
 
 
@@ -99,7 +100,7 @@ class AbstractParticipant:
                  last_suggestion_url_or_text,
                  last_text_suggestion_id
                  ):
-        logger.test(30008)
+        logging.test(30008)
         self._check_id_type(id_)
 
         self.campain = campain
@@ -120,30 +121,30 @@ class AbstractParticipant:
         self.time_before_suggesting_if_sandbox = get_time_before_suggesting()
 
     def get_normalised_id(self) -> str:
-        logger.test(30009)
+        logging.test(30009)
         return self.id.get_normalised_id()
 
     def get_last_checked_message_id(self) -> str:
         if self.last_checked_msg_id is None:
-            logger.test(30010)
+            logging.test(30010)
             return None
         else:
-            logger.test(30011)
+            logging.test(30011)
             return self.last_checked_msg_id.get_normalised_id()
 
     def set_last_checked_msg(self, last_checked_message_id):
         if last_checked_message_id is not None:
-            logger.test(30012)
+            logging.test(30012)
             self._check_message_id_type(last_checked_message_id)
         else:  ###
-            logger.test(30013)
+            logging.test(30013)
         self._set_last_checked_msg(last_checked_message_id)
 
-    def right_time_to_suggest_if_sandbox(self, now, time_before_suggesting):
+    def right_time_to_suggest_if_sandbox(self, now):
         if s.USE_SANDBOX :
             time_before_suggesting = self.time_before_suggesting_if_sandbox
         else :
-            raise TwitterstormError("On ne doit pas appeler cette méthode si USE_SANBOX = False")
+            logging.critical("On ne doit pas appeler cette méthode si USE_SANBOX = False")
         return (self.last_arrival_in_channel + time_before_suggesting) < now
 
     def _check_id_type(self, id_) -> bool:
@@ -188,17 +189,24 @@ class AbstractConnection(AbstractContextManager):
         Méthode __init__
         @rtype: None
         """
-        logger.test(30014)
+        logging.test(30014)
         self.db = database_connection
         self.me = None
         self.my_channel = None
+
+    async def init_conf(self):
+        # todo_chk mettre plutot ça a l'initialisation de la classe DataBAse, quand il y en aura une
+        #  mais attention ce sont des fonctions asychronses :(
+        await s.set_conf_var(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS_FREQUENCY', s.DEFAULT_SUGGESTIONS_FREQUENCY)
+        await s.set_conf_var(s.CAMPAIN_ID, 'SEND_ONLY_TO_ME', s.SEND_ONLY_TO_ME)
+        await s.set_conf_var(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS', s.DEFAULT_SUGGESTIONS)
 
     def __enter__(self):
         """
         Méthode "__enter__" du Context Manager.
         @rtype: AbstractConnection
         """
-        logger.test(30015)
+        logging.test(30015)
         return self.connect()
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -206,7 +214,7 @@ class AbstractConnection(AbstractContextManager):
         Méthode "__exit__" du Context Manager.
         @rtype: None
         """
-        logger.test(30016)
+        logging.test(30016)
         self.disconnect(exc_type, exc_value, traceback)
 
     async def _format_participants_info(self, participants_list):
@@ -250,20 +258,20 @@ class AbstractConnection(AbstractContextManager):
 
     async def _check_me(self, me):
         if self.me is None:
-            logger.test(30017)
+            logging.test(30017)
             if me is not None:
-                logger.test(30018)
+                logging.test(30018)
                 self.me = me
                 self.my_channel = await self._get_1to1_channel(me)
             else:
-                logger.test(30019)
+                logging.test(30019)
                 if s.SEND_ONLY_TO_ME:
                     # todo_chk : vérifier l'utilité d'avoir un utilisateur ME si send_only_to_me = False.
                     # todo_chk : Si pas utile, décaler le if s.SEND_ONLY_TO_ME avant l'appel de la méthode _check_me
-                    raise Exception("Attention, le compte de test ME doit être présent dans le channel dédié à la " +
+                    logging.critical("Attention, le compte de test ME doit être présent dans le channel dédié à la " +
                                     "twitterstorm si SEND_ONLY_TO_ME = True")
         else:  ###
-            logger.test(30020)
+            logging.test(30020)
 
     async def _welcome_and_say_goodbye(self, new_participants_info, participants_who_left_info):
 
@@ -297,18 +305,18 @@ class AbstractConnection(AbstractContextManager):
     def _add_and_update_participants(self, new_participants, participants_still_here):
         version = dt.datetime.now(s.TIMEZONE)
         if len(new_participants):
-            logger.test(30021)
+            logging.test(30021)
             self._insert_participants(new_participants, version)
         else:  ###
-            logger.test(30022)
+            logging.test(30022)
         if len(participants_still_here):
-            logger.test(30023)
+            logging.test(30023)
             self._update_version_of_known_participants(participants_still_here, version)
         else:  ###
-            logger.test(30024)
+            logging.test(30024)
 
     def save_request_from_participant(self, message, action, participant):
-        logger.test(30037)
+        logging.test(30037)
         self.db.insert_messages_to_bot([{'campain': s.CAMPAIN_ID,
                                          'participant_id': participant.get_normalised_id(),
                                          'msg': message.message_str,
@@ -322,7 +330,7 @@ class AbstractConnection(AbstractContextManager):
 
         @rtype: list(AbstractParticipant)
         """
-        logger.test(30025)
+        logging.test(30025)
         return [p for p in self.db.get_participants(self._get_participant_class(), consent=consent) if
                 self._is_reachable(p)]
 
@@ -331,7 +339,7 @@ class AbstractConnection(AbstractContextManager):
 
         @rtype: None
         """
-        logger.test(30026)
+        logging.test(30026)
         self.db.insert_participants(participants, now)
 
     def _record_sent_message(self, participant, msg):
@@ -339,7 +347,7 @@ class AbstractConnection(AbstractContextManager):
 
         @rtype: None
         """
-        logger.test(30027)
+        logging.test(30027)
         self.db.record_sent_message(
             [{"campain": s.CAMPAIN_ID, "participant_id": participant.get_normalised_id(), "msg": msg,
               "sent_at": dt.datetime.now(s.TIMEZONE)}])
@@ -349,7 +357,7 @@ class AbstractConnection(AbstractContextManager):
 
         @rtype: None
         """
-        logger.test(30028)
+        logging.test(30028)
         suffix = s.MSG_SUFFIX if s.MSG_SUFFIX is not None else ""
         await self._send_message(channel, suffix + msg)
         self._record_sent_message(participant, suffix + msg)
@@ -361,46 +369,42 @@ class AbstractConnection(AbstractContextManager):
         """
 
         if not s.SEND_ONLY_TO_ME:
-            logger.test(30029)
-            if not self.is_bot(participant):
-                logger.test(30032)
-                logger.test(30033)
-                logger.test(30034)
+            logging.test(30029)
+            if not self.is_bot(participant) and self._is_reachable(participant):
+                logging.test(30032)
+                logging.test(30033)
+                logging.test(30034)
                 if participant.is_ok or force:
                     await self._send_and_record_message(participant, channel, msg)
+
                 else:
-                    logger.warning(
-                        "Il est bizarre que l'on tente d'envoyer un message à quelqu'un.e qui ne le souhaite pas." \
-                        "(participant=%s (id=%s), '%s')" % (
-                        participant.display_name, participant.get_normalised_id(), msg))
+                    pass
+                    # todo_es dans la boucle de suggestion, on charge des gens qui sont pas OK, c'st bof, on tente quand meêm de leur envoyer des msg
 
             else:  ###
-                logger.test(30033)
+                logging.test(30033)
         else:
-            logger.test(30030)
+            logging.test(30030)
             if self.me is None or self.my_channel is None:
-                logger.test(30031)
-                raise Exception("Il semble que self.me ou self.my_channel n'aient pas été initialisés.")
+                logging.test(30031)
+                logging.error("Il semble que self.me ou self.my_channel n'aient pas été initialisés.")
             else:  ###
-                logger.test(30032)
+                logging.test(30032)
             msg = "Message initialement destiné à \n{}\n(id={}) :\n\n{}".format(participant.display_name,
                                                                                 participant.get_normalised_id(), msg)
             await self._send_and_record_message(self.me, self.my_channel, msg)
 
     def send_message_to_all_participants(self, message, participant, participants_info):
         self._filter_reachable_participants(participants_info)
-        logger.test(30033)
-        print(
-            "Ouais euh... j'ai un peu la flemme de le développer là (à l'origine tu veux envoyer un msg à toute la "
-            "boucle)")
+        logging.test(30033)
         return 2983879287987398792
 
     def _filter_reachable_participants(self, participants_info):
-        logger.test(30034)
+        logging.test(30034)
         return "La flemme"
 
     async def check_for_new_messages(self, participant, channel):
-        logger.test(30035)
+        logging.test(30035)
         msgs, updated_participant = await self._get_messages(channel, participant)
         self.db.update_last_checked_msg(updated_participant)
         # todo_op : ici on fait 1 appel à la bdd
@@ -409,7 +413,7 @@ class AbstractConnection(AbstractContextManager):
         return msgs, updated_participant
 
     def _update_version_of_known_participants(self, participants, now):
-        logger.test(30036)
+        logging.test(30036)
         self.db.update_version_of_participants(participants, now)
 
     def update_suggestions_frequency(self, participant, minutes):
@@ -484,6 +488,12 @@ class AbstractConnection(AbstractContextManager):
         # Le message 'text' doit être dans un message bien distinct, afin de pouvoir facilement le copier-coller
         return [s.TEXT_SUGGESTION_MSG_STR, text]
 
+    async def right_time_for_suggestions(self):
+        is_ok = await s.get_conf_value(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS')
+        is_ok = is_ok if is_ok is not None else False
+        logging.error("On checke si on peut envoyer des suggestions sauf que la variable DEFAULT_SUGGESTIONS est absente de la configuration")
+        return is_ok
+
     def connect(self):
         """
 
@@ -506,6 +516,9 @@ class AbstractConnection(AbstractContextManager):
         """
 
         """
+        raise NotImplementedError()
+
+    def is_admin(self, participant) -> bool:
         raise NotImplementedError()
 
     def _is_me(self, participant) -> bool:

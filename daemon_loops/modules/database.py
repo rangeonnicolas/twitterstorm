@@ -5,8 +5,9 @@ import pickle
 import re
 import sqlite3
 from shutil import copyfile
+import daemon_loops.modules.logging as logging
 
-import daemon_loops.settings as s
+import settings as s
 
 
 class DataBase:
@@ -40,12 +41,12 @@ class DataBase:
                     if except_func is not None:
                         except_func(e)
                     else:
-                        raise e
+                        logging.error(e)
             except Exception as e:
                 if except_func is not None:
                     except_func(e)
                 else:
-                    raise e  # todo_critical erreur non catchée
+                    logging.error(e)
         if res is None:
             result = None
         else:
@@ -295,9 +296,7 @@ class DataBase:
                 "where campain = '{}'                        ".format(s.CAMPAIN_ID) + \
                 "      and normalised_id in ('{}')             ".format("','".join(ids))
 
-            print(83784,"\n\nVoici la query:" + q + "\n\n")
             result = [row[0] for row in self._select(q, [])]
-            print(37834,"\n\nVoici le result:" + str(result) + "\n\n")
 
 
             return result

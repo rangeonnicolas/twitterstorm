@@ -2,10 +2,9 @@ from asgiref.sync import sync_to_async
 
 from daemon_loops.models import SentPlannedMessage, PostedTweet
 from daemon_loops.modules.telegram import TelegramParticipant
-from daemon_loops.settings import END_LISTENING_LOOP, CAMPAIN_ID
+from settings import END_LISTENING_LOOP, CAMPAIN_ID
 import datetime as dt
-import daemon_loops.settings as s
-import asyncio
+import settings as s
 
 TIMEZONE = s.TIMEZONE
 
@@ -136,8 +135,11 @@ class SandboxParticipant(TelegramParticipant):
 
             if when_to_send_the_message < now and now < it_is_a_bit_too_late_to_send_it:
                 if not await self._check_if_already_sent(message_id):
-                    message = "🗣 __**%s (animateur·ice de la mob.), vient de t'envoyer un message :**__\n\n%s" % (
-                        sender, message_txt)
+                    # todo_es quite au hack où on ne voulait pas afficher le nom de l'animateurice, merci de remmetre cette ligne :
+                    # message = "🗣 __**%s (animateur·ice de la mob.), vient de t'envoyer un message :**__\n\n%s" % (sender, message_txt)
+                    message = "🗣 __**L'un·e des animateurs·ices de la mobilisation vient de t'envoyer un message :**__\n\n%s" % (
+                        message_txt)
+
                     to_send.append({
                         'msg_id': message_id,
                         'message': message,
@@ -147,14 +149,12 @@ class SandboxParticipant(TelegramParticipant):
 
     @sync_to_async
     def _check_if_already_sent(self, message_id):
-        print(22)
         objs = SentPlannedMessage.objects.filter(
             campain_id = CAMPAIN_ID,
             receiver_id=self.get_normalised_id(),
             planned_message_id=message_id,
             sent_at__gte=self.last_arrival_in_channel
         )
-        print(objs)
         return len(objs) >= 1
 
     @sync_to_async

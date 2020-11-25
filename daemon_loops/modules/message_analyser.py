@@ -1,9 +1,9 @@
 from asgiref.sync import sync_to_async
-import daemon_loops.settings as s
+import settings as s
 
 from daemon_loops.modules.connection import AbstractParticipant
-from daemon_loops.modules.logger import logger
 from daemon_loops.modules.twitterstorm_utils import TwitterstormError
+import daemon_loops.modules.logging as logging
 
 MESSAGE_NOT_UNDERSTOOD_STR = \
     """🤖 Désolé, je n'ai pas compris ton message.
@@ -26,24 +26,61 @@ https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans l
 """.format(s.boucle)
 
 
+MESSAGE_NOT_UNDERSTOOD_STR_ADMIN = "Bon sérieux mec, j'ai pas pigé ton message. Voici les actions possibles : {}"
+
+
 
 class MessageAnalyser:
-    def __init__(self, conn, actions):
+    def __init__(self, conn, actions, admin_actions):
         self.actions = actions
+        self.admin_actions = admin_actions
         self.conn = conn
-        logger.test(10003)
+        logging.test(10003)
 
     @staticmethod
     def participant_has_requested_an_action(action_conf, m, participant):
         fn = action_conf['test_func']
-        logger.test(10004)
+        logging.test(10004)
         return fn(m.message_str, participant.get_normalised_id())
 
     async def analyse_message_from_normal_participant(self, message, participant, channel):
-        message_is_understood = False
+        return await self._analyse_messages_and_take_actions(self.actions, MESSAGE_NOT_UNDERSTOOD_STR, message, participant, channel)
+
+    async def analyse_message_from_scribe(self, message, participant, scribe_channel, participants_info):
         for action_name, action_conf in self.actions.items():
+            if action_name not in ["tweet_received"]:  # todo_es : c'est bof beau..
+                if self.participant_has_requested_an_action(action_conf, message, participant):
+                    logging.test(10011)
+                    answer = "Attention, vous êtes scribe. L'action '%s' n'est donc pas disponible pour vous." \
+                             % action_name  # todo_f : faire attention à ce que action_name soit compréhensible par le
+                    # scribe... :s
+                    await self.conn.send(participant, scribe_channel, answer)
+                    return participant
+                else:  ###
+                    logging.test(10009)
+            else:  ###
+                logging.test(10010)
+
+        logging.test(10011)
+
+        nb_participants = self.conn.send_message_to_all_participants(message, participant, participants_info)
+        answer = "Comme vous êtes enregistré.e comme scribe, votre message a été transféré à %i participants" \
+                 % nb_participants
+        await self.conn.send(participant, scribe_channel, answer)
+
+        return participant  # todo_chk : utile ? participant est il updaté à un moment?
+
+
+    async def analyse_message_from_admin(self, message, participant, channel):
+        # todo_es : ne pas faire ça, remettre la decription en toutes lettres et détaillée
+        error_msg = MESSAGE_NOT_UNDERSTOOD_STR_ADMIN.format(self.admin_actions.keys())
+        return await self._analyse_messages_and_take_actions(self.admin_actions, error_msg,  message, participant, channel)
+
+    async def _analyse_messages_and_take_actions(self, actions, ununderstood_str,  message, participant, channel):  # todo_es linguee ununderstood
+        message_is_understood = False
+        for action_name, action_conf in actions.items():
             if self.participant_has_requested_an_action(action_conf, message, participant):
-                logger.test(10005)
+                logging.test(10005)
                 message_is_understood = True
                 answer = action_conf['answer']
                 action_fn = action_conf['action_func']
@@ -51,7 +88,7 @@ class MessageAnalyser:
                 logmsg = "ACTION : " + participant.get_normalised_id() + "\t" + message.message_str + "\t" + \
                          action_name  #
                 # todo_es: ce message n'est pas très compréhensible
-                logger.debug(logmsg)
+                logging.debug(logmsg)
 
                 if answer is not None:
                     if type(answer) != str:
@@ -70,41 +107,18 @@ class MessageAnalyser:
                     participant = await async_action_fn(participant, channel, self.conn, message)
 
                 if not isinstance(participant, AbstractParticipant):
-                    raise TwitterstormError(
-                        "Attention, dans chaque action de self.actions, la valeur de la clé 'action_func' doit être une fonction retournant un participant.")
+                    logging.critical(
+                        "Attention, dans chaque action de self.actions ou self.admin_actions, la valeur de la clé 'action_func' doit être "
+                        "une fonction retournant un participant.")
 
             else:  ###
-                logger.test(10006)
+                logging.test(10006)
 
         if not message_is_understood:
-            logger.test(10007)
-            answer = MESSAGE_NOT_UNDERSTOOD_STR
+            logging.test(10007)
+            answer = ununderstood_str
             await self.conn.send(participant, channel, answer, force=True)
         else:  ###
-            logger.test(10008)
+            logging.test(10008)
 
         return participant
-
-    async def analyse_message_from_scribe(self, message, participant, scribe_channel, participants_info):
-        for action_name, action_conf in self.actions.items():
-            if action_name not in ["tweet_received"]:  # todo_es : c'est bof beau..
-                if self.participant_has_requested_an_action(action_conf, message, participant):
-                    logger.test(10011)
-                    answer = "Attention, vous êtes scribe. L'action '%s' n'est donc pas disponible pour vous." \
-                             % action_name  # todo_f : faire attention à ce que action_name soit compréhensible par le
-                    # scribe... :s
-                    await self.conn.send(participant, scribe_channel, answer)
-                    return participant
-                else:  ###
-                    logger.test(10009)
-            else:  ###
-                logger.test(10010)
-
-        logger.test(10011)
-
-        nb_participants = self.conn.send_message_to_all_participants(message, participant, participants_info)
-        answer = "Comme vous êtes enregistré.e comme scribe, votre message a été transféré à %i participants" \
-                 % nb_participants
-        await self.conn.send(participant, scribe_channel, answer)
-
-        return participant  # todo_chk : utile ? participant est il updaté à un moment?

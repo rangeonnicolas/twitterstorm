@@ -1,12 +1,17 @@
 import os
-import time
 import datetime as dt
 
-from asgiref.sync import sync_to_async
-
-import daemon_loops.settings as s
-from daemon_loops.modules.logger import logger, create_dirs_if_not_exists
+import settings as s
 import asyncio
+
+import daemon_loops.modules.logging as logging
+
+def create_dirs_if_not_exists(dirs_list):
+    for dir_ in dirs_list:
+        if not os.path.exists(dir_):
+            os.makedirs(dir_)
+
+
 
 def get_planned_messages_loop():
     return __import__(s.SANDBOX_MODULE_NAME).sandbox_loop
@@ -15,20 +20,13 @@ def get_time_before_suggesting():
     return __import__(s.SANDBOX_MODULE_NAME).TIME_BEFORE_SUGGESTING
 
 class TwitterstormError(Exception):  # todo_es : arevoir
-    def __init__(self, message, prefix="- ERREUR :  "):
-        os.system('cls')  # Windows
-        os.system('clear')  # Linux, Mac
-        super().__init__(message)
-        print("\n\n")
-        print(prefix + message)
-        print("\n" * 10 + "Aide au debuggage :\n")
-        logger.test(10000)
+    pass
 
-
-class TwitterstormSettingsError(TwitterstormError):
+class TwitterstormSettingsError(TwitterstormError):  # todo_es : a exploiter
     def __init__(self, message, file):
-        logger.test(10001)
-        super().__init__(message, prefix="- ERREUR DANS LE FICHIER DE CONFIGURATION '{}.py':  ".format(file.__name__))
+        #logging.test(10001)
+        #super().__init__(message, prefix="- ERREUR DANS LE FICHIER DE CONFIGURATION '{}.py':  ".format(file.__name__))
+        pass
 
 
 async def wait_for_next_iteration(last_loop_execution, time_between_two_iterations):
@@ -41,9 +39,10 @@ async def wait_for_next_iteration(last_loop_execution, time_between_two_iteratio
     return dt.datetime.now(s.TIMEZONE)
 
 
-def init():  # todo_f: affichcer dans les logs un résumé du chargement des données
+async def init(conn):  # todo_f: affichcer dans les logs un résumé du chargement des données
     # todo_chk: vérifier aussi, en cas de relancement d el'appli après plantage, qu'il n'y a pas d'actions
     #  en attente (ex: le scribe a un message qu'il n'a pas validé)
-    logger.test(10002)
+    logging.test(10002)
     create_dirs_if_not_exists([s.DATA_DIR, s.LOG_DIR, s.SESSION_DIR])
 
+    await conn.init_conf()

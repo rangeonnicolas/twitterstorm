@@ -4,16 +4,22 @@ env = os.environ.get("TS_ENV_TYPE")
 if env is None:
     raise Exception("Variable d'environnement TS_ENV_TYPE indéfinie")
 elif env.lower() == "dev":
+    ENV_TYPE = "DEV"
     f = 'settings_dev'
     sets = __import__(f)
 elif env.lower() == "prod":
+    ENV_TYPE = "PROD"
     f = 'settings_prod'
     sets = __import__(f)
 else :
     raise Exception("La valeur de la variable d'environnement est erronée : " + env)
-print("Importé : " + f)
+INIT_MSG_TO_LOG = "Importé : " + f
 
 MSG_SUFFIX = sets.MSG_SUFFIX
+MIN_TIME_BETWEEN_TWO_ERROR_LOGGINGS = sets.MIN_TIME_BETWEEN_TWO_ERROR_LOGGINGS
+
+
+
 
 
 
@@ -32,23 +38,29 @@ NEW_LISTENING_LOOP_ITERATION_EVERY = 2 * 1000  # En milisecondes
 CHECK_NEW_PARTICIPANTS_EVERY = 5 * 1000  # En milisecondes
 NEW_SUGGESTION_LOOP_ITERATION_EVERY = 4 * 1000  # En milisecondes
 
+
+
+
+
+
+DEFAULT_SUGGESTIONS = False if dt.datetime.now() < dt.datetime(2020,11,27,10,15) else True # détermine s'il faut envoyer les suggestions dès le lancement du programme (sans attendre la 'START' de l'admin
+
 DEFAULT_SUGGESTIONS_FREQUENCY = 1.2  # En minutes
 MIN_SUGGESTION_FREQUENCY = 0.5  # En minutes
 
 DEFAULT_CONSENT = True
-DEFAULT_TWEET_VALIDATION = False
+DEFAULT_TWEET_VALIDATION = False  # todo_chk useless
 
 SEND_ONLY_TO_ME = False
 
 # END_LISTENING_LOOP = dt.datetime(2020,5,24,8,0,0,tzinfo=s.TIMEZONE)
 END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 60 * 60)  # todo_cr a changer
 END_SUGGESTION_LOOP = END_LISTENING_LOOP  # todo_es : à merger
-START_SUGGESTIONS = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 5)  # todo_cr a changer
-END_SUGGESTIONS = END_LISTENING_LOOP  # todo_cr a changer
 
+# todo_chk réhabiliter ces 2 params?
 # note : en mode sandbox, ces paramètres ne sont pas pris en compte
-START_SUGGESTIONS = dt.datetime.now(TIMEZONE) # todo_cr mettre à 10h le jour J
-END_SUGGESTIONS = END_LISTENING_LOOP
+#START_SUGGESTIONS = dt.datetime.now(TIMEZONE) # todo_cr mettre à 10h le jour J
+#END_SUGGESTIONS = END_LISTENING_LOOP
 
 
 URL_SUGGESTION_MSG_STR = """🤖 Voici un tweet posté par un·e autre activiste (__**{}**__).

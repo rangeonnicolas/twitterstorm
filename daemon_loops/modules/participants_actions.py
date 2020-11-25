@@ -2,7 +2,7 @@ import datetime as dt
 import re
 from daemon_loops.models import PostedTweet
 
-import daemon_loops.settings as s
+import settings as s
 
 
 def insert_posted_tweet(p, channel, conn, m):
@@ -71,6 +71,15 @@ async def send_other_suggestion(participant, channel, conn, message):
         await conn.send_suggestion(participant, channel, text_id=participant.last_text_suggestion_id, force=True)
     return participant
 
+
+async def start_suggestions(conn,p):
+    await s.set_conf_var(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS', True)
+    return p
+
+async def end_suggestions(conn,p):
+    await s.set_conf_var(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS', False)  # todo_es : changer le nom de cette variable
+    return p
+
 actions = {
     'stop': {
         'name': 'STOP',
@@ -115,5 +124,33 @@ actions = {
         'answer': None,
         'action_func': lambda p, c, conn, m: p,
         'async_action_func': send_other_suggestion
+    },
+}
+
+async def _raise():  # todo_cr
+    raise Exception("Admin raised exception")
+
+
+admin_actions = {
+    'START': {
+        'name': 'START',
+        'test_func': lambda message_str, p: "start" == format_participant_message(message_str),
+        'answer': "🤖 Tu viens de lancer les suggestions. Pour les arrêter, réponds 'END'" if not s.USE_SANDBOX else "[fonction incompatible avec le mode SANDBOX]",
+        'action_func': lambda p, c, conn, m: p,
+        'async_action_func': lambda p, c, conn, m: start_suggestions(conn, p),
+    },
+    'END': {
+        'name': 'END',
+        'test_func': lambda message_str, p: "end" == format_participant_message(message_str),
+        'answer': "🤖 Tu viens de stopper les suggestions. Pour les relancer, réponds 'START'" if not s.USE_SANDBOX else "[fonction incompatible avec le mode SANDBOX]",
+        'action_func': lambda p, c, conn, m: p,
+        'async_action_func': lambda p, c, conn, m: end_suggestions(conn, p),
+    },
+    'EXCEPT': {
+        'name': '12345ZZZ',
+        'test_func': lambda message_str, p: "12345zzz" == format_participant_message(message_str),
+        'answer': "🤖 Tu viens de lever une exception dans le programme. Attention c'est dangereux !",
+        'action_func': lambda p, c, conn, m: p, #_raise(),
+        'async_action_func': lambda p, c, conn, m: _raise(),
     },
 }
