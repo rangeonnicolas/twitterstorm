@@ -1,9 +1,7 @@
 import datetime as dt
 import os
 import traceback
-import settings as s
-from telethon.errors.rpcerrorlist import FloodWaitError
-
+from settings import settings as s
 
 _d = s.LOG_DIR
 

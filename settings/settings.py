@@ -1,3 +1,22 @@
+import datetime as dt
+from settings.advanced_settings import TIMEZONE, LOG_DIR, DATA_DIR, SESSION_LISTENING_LOOP
+from settings.advanced_settings import *
+
+###################################################################################################
+CAMPAIN_ID = "TwitterStrorm_BF1"
+
+USE_SANDBOX = False
+
+if not USE_SANDBOX:
+    DEFAULT_SUGGESTIONS = False                                                  # todo_es : changer le nom de la variable en BDD mais pas ici ;)
+    DEFAULT_SUGGESTIONS_FREQUENCY = 1.8                                          # En minutes
+else:
+    DEFAULT_SUGGESTIONS = True
+    DEFAULT_SUGGESTIONS_FREQUENCY = 1.2
+
+END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 60 * 60)        # todo_es a changer
+
+###################################################################################################
 import os
 
 env = os.environ.get("TS_ENV_TYPE")
@@ -5,67 +24,61 @@ if env is None:
     raise Exception("Variable d'environnement TS_ENV_TYPE indéfinie")
 elif env.lower() == "dev":
     ENV_TYPE = "DEV"
-    f = 'settings_dev'
-    sets = __import__(f)
+    f = 'settings.settings_dev'
+    sets = __import__(f).settings_dev
 elif env.lower() == "prod":
     ENV_TYPE = "PROD"
-    f = 'settings_prod'
-    sets = __import__(f)
+    f = 'settings.settings_prod'
+    sets = __import__(f).settings_prod
 else :
     raise Exception("La valeur de la variable d'environnement est erronée : " + env)
 INIT_MSG_TO_LOG = "Importé : " + f
 
 MSG_SUFFIX = sets.MSG_SUFFIX
 MIN_TIME_BETWEEN_TWO_ERROR_LOGGINGS = sets.MIN_TIME_BETWEEN_TWO_ERROR_LOGGINGS
-
-
-
-
-
-
-import datetime as dt
-from daemon_loops.modules.advanced_settings import *  # todo_es utiliser une autre méthode
-from daemon_loops.modules.advanced_settings import TIMEZONE
+###################################################################################################
 
 CLIENT = "Telegram"  # todo_es : variable encore utlisée ?
 
-CAMPAIN_ID = "TwitterStrorm_2"
-
-USE_SANDBOX = True  # todo_cr
 SANDBOX_MODULE_NAME = 'sandbox_loop'
+SEND_ONLY_TO_ME = False
+
+END_SUGGESTION_LOOP = END_LISTENING_LOOP  # todo_es : à merger
 
 NEW_LISTENING_LOOP_ITERATION_EVERY = 2 * 1000  # En milisecondes
 CHECK_NEW_PARTICIPANTS_EVERY = 5 * 1000  # En milisecondes
 NEW_SUGGESTION_LOOP_ITERATION_EVERY = 4 * 1000  # En milisecondes
 
-TIME_LIMIT_TO_FETCH_MSGS = 30 * 60 # En secondes
+TIME_LIMIT_TO_FETCH_PREVIOUS_MSGS = 30 * 60 # En secondes
 
-
-
-# todo_es : changer le nom de la variable en BDD mais pas ici ;)
-DEFAULT_SUGGESTIONS = False if dt.datetime.now() < dt.datetime(2020,11,27,10,15) else True # détermine s'il faut envoyer les suggestions dès le lancement du programme (sans attendre la 'START' de l'admin
 # todo_es franchement, trouver un autre nom de variable stp
 DEFAULT_IS_CAMPAIN_OPEN = False
 
-DEFAULT_SUGGESTIONS_FREQUENCY = 1.2  # En minutes
 MIN_SUGGESTION_FREQUENCY = 0.5  # En minutes
 
 DEFAULT_CONSENT = True
 DEFAULT_TWEET_VALIDATION = False  # todo_chk useless
 
-SEND_ONLY_TO_ME = False
-
-# END_LISTENING_LOOP = dt.datetime(2020,5,24,8,0,0,tzinfo=s.TIMEZONE)
-END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 60 * 60)  # todo_cr a changer
-END_SUGGESTION_LOOP = END_LISTENING_LOOP  # todo_es : à merger
-
 # todo_chk réhabiliter ces 2 params?
-# note : en mode sandbox, ces paramètres ne sont pas pris en compte
-#START_SUGGESTIONS = dt.datetime.now(TIMEZONE) # todo_cr mettre à 10h le jour J
-#END_SUGGESTIONS = END_LISTENING_LOOP
+# Note : en mode SANBOX, ces paramètres ne sont pas pris en compte
+# START_SUGGESTIONS = dt.datetime.now(TIMEZONE) # todo_cr mettre à 10h le jour J
+# END_SUGGESTIONS = END_LISTENING_LOOP
+
+LOG_DIR = LOG_DIR
+DATA_DIR = DATA_DIR
+SESSION_LISTENING_LOOP = SESSION_LISTENING_LOOP
+
+###################################################################################################
 
 ROBOT_MSG_SUFFIX = "🤖 : "
 ANIMATOR_MSG_SUFFIX = "🗣 : "
+
+# todo_es quite au hack où on ne voulait pas afficher le nom de l'animateurice, merci de remmetre cette ligne :
+ANIMATOR_MSG_INTRO = "__**L'un·e des animateurs·ices de la mobilisation vient de t'envoyer un message :**__\n\n"
+#ANIMATOR_MSG_INTRO = "__**%s (animateur·ice), vient de t'envoyer un message :**__\n\n" % sender_name !! bien faire attention au sender_name (cf CTRL+F 'intro = s.ANIMATOR_MSG_SUFFIX + s.ANIMATOR_MGS_INTRO % sender_name')
+
+
+SEND_ONLY_TO_ME_INTRO = "Message initialement destiné à \n{}\n(id={}) :\n\n{}"
 
 URL_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un tweet posté par un·e autre activiste (__**{}**__).
 
@@ -79,10 +92,79 @@ TEXT_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un message que tu peux cop
 Pour générer à nouveau ce message, mais en ciblant un·e autre député·e, réponds-moi __**AUTRE**__.
 """
 
-# todo_es : pas à la bonne place
-invite_link = "https://t.me/joinchat/I-xqAEUulztdUOz-RTsOdQ"
-animateurices = "Johanna et Matthieu"
-boucle = '[DEMO] 🛒 surprod - comm Interpellation'
+
+
+
+ACTION_FREQ_MINUTES = "%.2f minutes"
+ACTION_FREQ_SECONDS = "%i secondes"
+ACTION_FREQ_UPDATE = "Je t'enverrai des suggestions toutes les %s.\n\n__**(Note : Ceci ne vaut que pour les\
+ suggestions que je t'envoie automatiquement, par pour les messages des animateur·ice·s 🗣)**__"
+ACTION_FREQ_ERROR = "Je n'ai pas compris la fréquence à laquelle je dois t'envoyer les suggestions\nPar exemple : " \
+                    "__**FREQ 3**__, " \
+                    "ou __**FREQ 0.5**__"
+
+ACTION_ANSWER_STOP = "Tu as demandé à ne plus reçevoir de messages, alors je me tais ;)\n\nSi tu changes " + \
+                     "d'avis, réponds __**REPRENDRE**__\n\n(__**Note**__ : Je ne te transfèrerai plus non plus les " + \
+                     "messages des animateur·ice·s 🗣)\n\nMerci pour ta participation !"
+ACTION_ANSWER_START = "Tu as demandé à reprendre, merci !\n\nSi tu changes d'avis, réponds __**STOP**__ " + \
+                      "\n\nMerci pour ta participation !"
+ACTION_ANSWER_TWEET_RECEIVED = "Merci pour ton tweet. Il sera suggéré aux autres activistes pour qu'iels le retweetent."
+ACTION_ANSWER_REPORT_BUG = "Merci pour ce signalement de bug.\nJe le transmet de ce pas !"
+ACTION_ADMIN_OPEN_CAMPAIN = "Tu viens de lancer la campagne ! Les participant·e·s viennent donc de reçevoir le message d'accueil. Pour clôturer la campagne, réponds 'CLOSE'"
+ACTION_ADMIN_SANDBOX_ERROR = "[fonction incompatible avec le mode SANDBOX]"
+ACTION_ADMIN_CLOSE_CAMPAIN = "Tu viens de clôturer la campagne. Les nouveaux et nouvelles participant·e·s arrivant sur la boucle ne reçevront plus le message d'accueil. Pour réouvrir la campagne, réponds 'OPEN'. Dans ce cas, les participant·e·s ayant déjà reçu le message d'accueil ne le reçevront pas une seconde fois."
+ACTION_ADMIN_START_SUGGESTIONS = "Tu viens de lancer les suggestions. Pour les arrêter, réponds 'END SUGGESTIONS'"
+ACTION_ADMIN_END_SUGGESTIONS = "Tu viens de stopper les suggestions. Pour les relancer, réponds 'START SUGGESTIONS'"
+ACTION_ADMIN_RAISE_EXCEPTION = "Tu viens de lever une exception dans le programme. Attention c'est dangereux !"
+
+
+if not USE_SANDBOX:
+    # todo_es : pas à la bonne place
+    invite_link = "https://t.me/joinchat/I-xqAEUulztdUOz-RTsOdQ"
+    animateurices = ""
+    boucle = '[DEMO] 🛒 surprod - comm Interpellation'
+    debut_str = '__**Vendredi 27 nov à 10h**__'
+else:
+    invite_link = "https://t.me/joinchat/I-xqAEUulztdUOz-RTsOdQ"                  # todo_es : pas vraiment le bon lien
+    animateurices = "(__**Johanna et Matthieu**__)"
+    boucle = '🛒 surprod - comm Interpellation'
+    debut_str = "dans :\n__**2MINUTES**__"
+
+
+
+MESSAGE_NOT_UNDERSTOOD_STR = \
+    ROBOT_MSG_SUFFIX + """Désolé, je n'ai pas compris ton message.
+
+👉🏼 Si tu n'es plus disponible pour cette mob, envoies-moi __**STOP**__, et je me taierai.
+
+👉🏼 Si je suis trop (ou pas assez) bavard, envoies __**FREQ 1**__, en remplaçant __**1**__ par le nombre de \
+minutes desquelles \
+tu veux que j'espace mes messages.
+
+👉🏼 Si tu détectes un bug de mon fonctionnement (ou des fautes d'orthographe), envoies-moi __**BUG**__ suivi de \
+la description du problème.
+
+👉🏼 De ton côté, je t'invite à m'envoyer les URL des tweets que tu as postés, afin que je les propose aux \
+autres activistes de la boucle. Je suis spécialement entraîné à reconnaître les URL des tweets (de type \
+https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans les messages que tu m'enverras ici \
+😊
+
+👉🏼 Si tu souhaites t'adresser à de vrais humains, tu peux poster un message dans la boucle __**{}**__.
+""".format(boucle)
+
+
+MESSAGE_NOT_UNDERSTOOD_STR_ADMIN = "Bon sérieux mec, j'ai pas pigé ton message. Voici les actions possibles : {}"
+
+SCRIBE_ACTION_ERROR = "Attention, vous êtes scribe. L'action '%s' n'est donc pas disponible pour vous."
+SCRIBE_FORWARDED_MESSAGE = "Comme vous êtes enregistré.e comme scribe, votre message a été transféré à %i participants"
+
+
+
+
+
+
+
+
 
 # Pour les messages suivants, mettre une liste vide si pas de message à envoyer
 WELCOME_SCRIBE_MSGS = ["Salut Scribe!"]
@@ -93,8 +175,7 @@ Bonjour !
 Merci de participer à l'action d'interpellation contre Amazon. 😍
 
 Tu reçois ce message car tu es inscrit.e dans la boucle __**'{}'**__.
-Cette boucle est destinée aux informations générales de la mobilisation d'interpellation qui commence dans :\n__**2 \
-MINUTES**__
+Cette boucle est destinée aux informations générales de la mobilisation d'interpellation qui commence {}.\
 
 Cependant, cette boucle contient beaucoup d'activisites, et il n'est pas toujours pratique de suivre tous les 
 messages qui \ 
@@ -107,7 +188,7 @@ et moi. 😊
 Mais moi, je suis qui au fait ?
 
 Je suis un programme informatique (un robot ! 🤖), et j'ai 3 rôles :
-👉🏼 Te transférer les instructions importantes des animateur.ice.s de la mobilisation (__**{}**__). 
+👉🏼 Te transférer les instructions importantes des animateur.ice.s de la mobilisation {}. 
 👉🏼 Te suggérer des textes que tu pourra copier pour les poster sur twitter. 
 👉🏼 Te suggérer des tweets postés par d'autres activistes pour que tu les Like et les Retweete.
 
@@ -117,7 +198,7 @@ https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans l
 😊.
 
 Allez, ensemble on va saturer twitter, et mettre la pression à Amazon !!! 💪🏼""".format(
-    boucle, animateurices),
+    boucle, debut_str, animateurices),
     """Ah oui, une dernière chose :
 
 👉🏼 Si tu n'es plus disponible pour cette mob, envoies-moi __**STOP**__, et je me taierai.

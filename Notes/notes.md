@@ -1,19 +1,12 @@
 # Todo
-
 ## Features
-
 ### Critique
-
 ### Important
 - fonction de suppression des trucs innutiles dans la BDD
 - enregistrement des clics de postage
-- updater en temps rééel le frequences
+X updater en temps rééel le frequences
+x clic to tweet
 - analyse des perfs : logs à supprimer, BDD
-- WORDING
-- RAPIDE
-- PERF
-- FIABILITE
-- monitoring technique
 
 ### Intéressant
 - tests
@@ -21,37 +14,32 @@
 - enregistrer les bugs ;)
 - pinage de 1message récap
 
-
 ## wording
-- c'est mieux si les gens Répondent aux tweets
-- "postez-le entre 10:30 et 10:37 pour optimiser"
-- On essaie de tenir jusque, de manière régulière
-- url des tweets à composer : dire que s'ils sont pas connectés ça marchera pas !
+X c'est mieux si les gens Répondent aux tweets
+X "postez-le entre 10:30 et 10:37 pour optimiser"
+X On essaie de tenir jusque, de manière régulière
+X url des tweets à composer : dire que s'ils sont pas connectés ça marchera pas !
 
 ## rapide
 - gitter les fichiers config
-- TwitterWatch fonctionne t'il tjrs ?
+x TwitterWatch fonctionne t'il tjrs ?
 - !! detecter les mauvaises urls ! postées par les participants au robot
-- CHECK détection des mauvaises URLs
-- CHECK peut on piner un message
+x CHECK peut on piner un message
 - todo : n'accepter qu'un message a la fois (ex : bug https://twitter.com/actionclimat75/status/1326090258438643712 lol)
 - TW a 'til des logs chiants ? une grosse BDD?'
 - créer des users TG
 
 ## Fiabilité
-- détection des mauvaises URLs
 - 3 boucles séparées
 
 ## Performance
-
 - Passer la sqlite3 en Django
-- Django avec Postgres
+X Django avec Postgres
 - vider la BDD + suppression de doublons innutiles
 - todo_op
 - normalisation des urls des tweets pour éviter les doublons + vérification de doublon avat d'insérer dans la BDD
 
 # Tâches jour J
-
 ## J - 1
 - renommer le robos en "Nico2"
 - ajout des comptes (y compris BOT) à la boucle :
@@ -60,27 +48,17 @@
     - 1 compte ACT-LAMBDA
     - 1 compte SCRIBE-ANIMATOR
     - 1 compte SCRIBE-ROBOT
-- liste des reachable users
-- revoir tt le wording
-- actualiser les tweets
-
-- TEST avec 5 reachable USERS :
-  - brancher le prog sur la boucle SANS ENVOYER DE MESSAGE
-  - tester l'appli avec les restricted users
-  - remettre les bons restricted users
-
 - todo_cr
-- revoir tte la conf
-
 
 ## H - 2
-- message d'accueil
+- dire aux gens que le robot s'appelle en fait Nicolas
+- message d'accueil (OPEN)
 
 ## H - 1
 - chopper les TT
 
 ## H = 0
-- LANCER LES SUGGESTIONS ;) (start / end)
+- LANCER LES SUGGESTIONS ;) (start suggestions / end suggestions)
 - remplir rapidement la BDD avec les tweets
 - transférer le message de lancement
 
@@ -90,7 +68,6 @@
 - savoir quand descendre la frequence + le notifier
 
 ## Data 
-
 - sauvegarder BDD
 - supprimer logs
 - vider BDD
@@ -102,19 +79,15 @@
 - tester l'envoi de message à partir du compte act. LAMBDA
 
 ## Sur Twitter
-
 - surveiller les TT
 - surveiller les tweets des comptes importants
 
 ## Autres
-
 - recherche une nouvelle librairie python de twitterscraping
 
 
 
-
 # Monitoring & stats
-
 ## Stats de performance de campagne
 x nb de tweets sur twitter
 
@@ -138,11 +111,7 @@ x nb de tweets sur twitter
 
 
  
-
-
-
 # Futur
-
 ## Features
 - conf : mettre des comptes twitter plus importants que d'autres qui ont plus de chances detre retwités
 - envoi de (mail/msg Teleg) à 5 amis chacun.e pour leur demander de retweeter
@@ -168,13 +137,10 @@ x nb de tweets sur twitter
 
 
 # Notes en vrac
-
 ## Urls
-
 - https://getdaytrends.com/fr/france/
 
 ## Spécificités twitter
-
 Pour le poster, vous n'avez qu'à cliquer ici : https://twitter.com/compose/tweet?text=.%40FredericOudea%20va%20mettre%20sur%20pied%20une%20trajectoire%20passant%27probablement%27par%20la%20r%C3%A9duction%20en%20valeur%20absolue%20des%20p%C3%A9trole%20et%20gaz.%20Il%20y%20a%20des%20raisons%20de%20s%27inqui%C3%A9ter%20quand%20vous%20dites%20que%20vous%20voulez%20soutenir%20la%20croissance%20du%20%23schiste%21%20%23VosParisNotreAvenir
 
 - exemples :
@@ -186,7 +152,6 @@ Pour le poster, vous n'avez qu'à cliquer ici : https://twitter.com/compose/twee
  - https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/guides/web-intent
 
 ## Idées
-
 - Faire un concours pour que les gens s'emparent du TT ?
 - Humour (idem, pr que les gens s'en emparent)
 - Sondage?

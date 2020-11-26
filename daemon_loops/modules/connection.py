@@ -4,11 +4,11 @@ from contextlib import AbstractContextManager
 
 from asgiref.sync import sync_to_async
 
-import settings as s
+from settings import settings as s
 from daemon_loops.models import PostedTweet, SentTweetUrl, SentTextSuggestion
 import daemon_loops.modules.logging as logging
 from daemon_loops.modules.message_generator import MessageGenerator
-from daemon_loops.modules.twitterstorm_utils import TwitterstormError, get_time_before_suggesting
+from daemon_loops.modules.twitterstorm_utils import get_time_before_suggesting
 
 logging.info(s.INIT_MSG_TO_LOG)
 
@@ -89,11 +89,9 @@ class AbstractMessage:
         if scribe_type == "SCRIBE_ROBOT":
             intro = s.ROBOT_MSG_SUFFIX
         elif scribe_type == "SCRIBE_ANIMATOR":
-            # todo_es quite au hack où on ne voulait pas afficher le nom de l'animateurice, merci de remmetre cette
-            #  ligne :
-            intro = s.ANIMATOR_MSG_SUFFIX + "__**L'un·e des animateurs·ices de la mobilisation vient de " \
-                                              "t'envoyer un message :**__\n\n"
-            #intro = s.ANIMATOR_MSG_SUFFIX + "__**%s (animateur·ice), vient de t'envoyer un message :**__\n\n" % sender_name
+
+            intro = s.ANIMATOR_MSG_SUFFIX + s.ANIMATOR_MSG_INTRO
+            #intro = s.ANIMATOR_MSG_SUFFIX + s.ANIMATOR_MGS_INTRO % sender_name
         else:
             logging.critical('Option non disponible')
         st = intro + st
@@ -425,7 +423,7 @@ class AbstractConnection(AbstractContextManager):
                 logging.error("Il semble que self.me ou self.my_channel n'aient pas été initialisés.")
             else:  ###
                 logging.test(30032)
-            msg = "Message initialement destiné à \n{}\n(id={}) :\n\n{}".format(participant.display_name,
+            msg = s.SEND_ONLY_TO_ME_INTRO.format(participant.display_name,
                                                                                 participant.get_normalised_id(), msg)
             await self._send_and_record_message(self.me, self.my_channel, msg)
 

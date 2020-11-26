@@ -7,7 +7,7 @@ import sqlite3
 from shutil import copyfile
 import daemon_loops.modules.logging as logging
 
-import settings as s
+from settings import settings as s
 
 
 class DataBase:

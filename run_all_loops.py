@@ -6,7 +6,7 @@ from daemon_loops.modules.telegram import TelegramConnection
 from daemon_loops.modules.twitterstorm_utils import get_planned_messages_loop
 from daemon_loops.modules.message_analyser import MessageAnalyser
 import asyncio
-import settings as s
+from settings import settings as s
 import daemon_loops.modules.logging as logging
 
 

@@ -6,22 +6,19 @@ import struct
 import sys
 import dateutil.parser
 
-#from daemon_loops.modules.twitterstorm_utils import init
-#from daemon_loops.modules.database import DataBase
-#from daemon_loops.modules.participants_actions import actions
+from daemon_loops.modules.twitterstorm_utils import init
+from daemon_loops.modules.database import DataBase
+from daemon_loops.modules.participants_actions import actions
 
 from telethon.errors.rpcerrorlist import PhoneCodeInvalidError, AuthKeyUnregisteredError, FloodWaitError, \
     PeerIdInvalidError
 from telethon.sync import TelegramClient
 
-import settings as s
-import telegram_settings as ts
+from settings import settings as s, telegram_settings as ts
 from daemon_loops.modules.connection import AbstractMessageId, AbstractParticipant, AbstractConnection, \
     AbstractChannel, \
     AbstractParticipantId, AbstractMessage
 import daemon_loops.modules.logging as logging
-from daemon_loops.modules.twitterstorm_utils import TwitterstormError
-from daemon_loops.modules.message_analyser import MessageAnalyser
 
 logging.info(s.INIT_MSG_TO_LOG)
 
@@ -527,7 +524,7 @@ class TelegramConnection(AbstractConnection):
             if last_checked_message_tg_id is not None else {}
 
         messages = await self.tg_client.get_messages(channel.get_tg_channel(), ts.NB_MSG_TO_FETCH, **kwargs)
-        messages = [m for m in messages if m.date > dt.datetime.now(s.TIMEZONE) - dt.timedelta(0,s.TIME_LIMIT_TO_FETCH_MSGS)]
+        messages = [m for m in messages if m.date > dt.datetime.now(s.TIMEZONE) - dt.timedelta(0, s.TIME_LIMIT_TO_FETCH_PREVIOUS_MSGS)]
 
         if len(messages):
             logging.test(20058)
@@ -796,6 +793,7 @@ class TelegramConnection(AbstractConnection):
             return False
 
     async def search_channels(self, string=None):
+        # todo_chk : Il faut pouvoir se connecter avec un autre compte que le BOT
         logging.test(20094)
         channels = await self._get_all_channels()
         filtered_channels = [ch for ch in channels if string is None or string.lower() in ch['title'].lower()]
@@ -848,12 +846,12 @@ class TelegramConnection(AbstractConnection):
     def run_with_async_loop(self, call):
         return self.tg_client.loop.run_until_complete(call)
 
-#def run():  # todo_es: enlever à terme
-#    init()
-#    db = DataBase()
-#    conn = TelegramConnection(db).__enter__()
-#    analyser = MessageAnalyser(conn, actions)
-#    conn.run_with_async_loop(conn.search_channels("prod"))
+def run():  # todo_es: enlever à terme
+    db = DataBase()
+    conn = TelegramConnection(db).__enter__()
+    #async.run(init(conn))
+    #analyser = MessageAnalyser(conn, actions)
+    conn.run_with_async_loop(conn.search_channels())
 
-#if __name__ == "__main__":  # todo_es: enlever à terme
-#    run()
+if __name__ == "__main__":  # todo_es: enlever à terme
+    run()

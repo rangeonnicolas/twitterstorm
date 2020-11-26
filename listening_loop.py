@@ -1,6 +1,6 @@
 import datetime as dt
 from daemon_loops.modules.twitterstorm_utils import wait_for_next_iteration
-import settings as s  # todo_es : renommer l'alias
+from settings import settings as s
 from daemon_loops.modules.database import DataBase
 import daemon_loops.modules.logging as logging
 from daemon_loops.modules.participants_actions import actions, admin_actions

@@ -2,7 +2,8 @@ import datetime as dt
 import re
 from daemon_loops.models import PostedTweet
 
-import settings as s
+from settings import settings as s
+
 
 # todo_chk c'est très chelou qu'on ne douve pas faire passer cette fonction en asynchrone...
 def insert_posted_tweet(p, channel, conn, m):
@@ -44,18 +45,18 @@ def analyse_frequency(message_str):
     return True, minutes
 
 
+
 def answer_for_frequency(message_str):
     format_is_ok, minutes = analyse_frequency(message_str)
     if format_is_ok:
         if minutes < 1:
-            freq = "%i secondes" % (int(minutes * 60))
+            freq = s.ACTION_FREQ_SECONDS % (int(minutes * 60))
         else:
-            freq = "%.2f minutes" % minutes
-        return "Je t'enverrai des suggestions toutes les %s.\n\n__**(Note : Ceci ne vaut que pour les\
- suggestions que je t'envoie automatiquement, par pour les messages des animateur·ice·s 🗣)**__" % freq
+            freq = s.ACTION_FREQ_MINUTES % minutes
+        return s.ACTION_FREQ_UPDATE % freq
     else:
-        "Je n'ai pas compris la fréquence à laquelle je dois t'envoyer les suggestions\nPar exemple : __**FREQ 3**__, " \
-        "ou __**FREQ 0.5**__"
+        return s.ACTION_FREQ_ERROR
+
 
 
 def update_frequency_for_participant(p, conn, message_str):
@@ -94,31 +95,28 @@ async def close_campain(conn, p):
         await s.set_conf_var(s.CAMPAIN_ID, 'CAMPAIN_IS_OPEN', False)
     return p
 
+
+
 actions = {
     'stop': {
         'name': 'STOP', # doit être compréhensible par un scribe
         'test_func': lambda message_str, p: "stop" == format_participant_message(message_str),
-        'answer': s.ROBOT_MSG_SUFFIX + "Tu as demandé à ne plus reçevoir de messages, alors je me tais ;)\n\nSi tu changes "
-                  "d'avis, réponds __**REPRENDRE**__\n\n(__**Note**__ : Je ne te transfèrerai plus non plus les "
-                  "messages des animateur·ice·s 🗣)\n\nMerci pour ta participation !",
+        'answer': s.ROBOT_MSG_SUFFIX + s.ACTION_ANSWER_STOP,
         'action_func': lambda p, c, conn, m: conn.db.update_participant_consent(p, False)
     },
-    'reprendre': {
+    'reprendre': {   # todo_es : english please (+ ! chercher les références dans message_analyser.py)
         'name': 'REPRENDRE',
         'test_func': lambda message_str, p: "reprendre" == format_participant_message(message_str),
-        'answer': s.ROBOT_MSG_SUFFIX + "Tu as demandé à reprendre, merci !\n\nSi tu changes d'avis, réponds __**STOP**__ "
-                  "\n\nMerci pour ta participation !",
+        'answer': s.ROBOT_MSG_SUFFIX + s.ACTION_ANSWER_START,
         'action_func': lambda p, c, conn, m: conn.db.update_participant_consent(p, True)
     },
     'tweet_received': {
         'name': 'SUGGERER UN TWEET',
         'test_func': lambda message_str, p: detect_tweet_url(message_str),
         # !!! supprimer les arguments après le ? dans l'url
-        'answer': s.ROBOT_MSG_SUFFIX + "Merci pour ton tweet. Il sera suggéré aux autres activistes pour qu'iels le retweetent.",
+        'answer': s.ROBOT_MSG_SUFFIX + s.ACTION_ANSWER_TWEET_RECEIVED,
         'action_func': insert_posted_tweet
     },
-
-
     'change_frequency': {
         'name': 'CHANGER FREQUENCE DES SUGGESTIONS',
         'test_func': lambda message_str, p: len(re.findall(r'\A\s*freq\s*[0-9,\.]+', message_str.lower())),
@@ -129,7 +127,7 @@ actions = {
         'name': 'SIGNALER UN BUG',
         'test_func': lambda message_str, p: "bug" == format_participant_message(message_str)[:3],
         # todo_es : pas très élégant le [:3]
-        'answer': s.ROBOT_MSG_SUFFIX + "Merci pour ce signalement de bug.\nJe le transmet de ce pas !",
+        'answer': s.ROBOT_MSG_SUFFIX + s.ACTION_ANSWER_REPORT_BUG,
         'action_func': lambda p, c, conn, m: p
     },
     'other_formulation': {
@@ -144,43 +142,41 @@ actions = {
 async def _raise():  # todo_cr
     raise Exception("Admin raised exception")
 
-
 admin_actions = {
     'OPEN_CAMPAIN': {
         'name': 'OPEN',
         'test_func': lambda message_str, p: "open" == format_participant_message(message_str),
-        'answer': s.ROBOT_MSG_SUFFIX + "Tu viens de lancer la campagne ! Les participant·e·s viennent donc de reçevoir le message d'accueil. Pour clôturer la campagne, réponds 'CLOSE'" if not
-        s.USE_SANDBOX else "[fonction incompatible avec le mode SANDBOX]",
+        'answer': s.ROBOT_MSG_SUFFIX + s.ACTION_ADMIN_OPEN_CAMPAIN if not
+        s.USE_SANDBOX else s.ACTION_ADMIN_SANDBOX_ERROR,
         'action_func': lambda p, c, conn, m: p,
         'async_action_func': lambda p, c, conn, m,pi=None: open_campain(conn, p, pi),
     },
     'CLOSE_CAMPAIN': {
         'name': 'CLOSE',
         'test_func': lambda message_str, p: "close" == format_participant_message(message_str),
-        'answer': s.ROBOT_MSG_SUFFIX + "Tu viens de clôturer la campagne. Les nouveaux et nouvelles participant·e·s arrivant sur la boucle ne reçevront plus le message d'accueil. Pour réouvrir la campagne, réponds 'OPEN'. Dans ce cas, les participant·e·s ayant déjà reçu le message d'accueil ne le reçevront pas une seconde fois." if
-        not s.USE_SANDBOX else "[fonction incompatible avec le mode SANDBOX]",
+        'answer': s.ROBOT_MSG_SUFFIX + s.ACTION_ADMIN_CLOSE_CAMPAIN if
+        not s.USE_SANDBOX else s.ACTION_ADMIN_SANDBOX_ERROR,
         'action_func': lambda p, c, conn, m: p,
         'async_action_func': lambda p, c, conn, m,pi=None: close_campain(conn, p),
     },
-
     'START_SUGGESTIONS': {
         'name': 'START SUGGESTIONS',
         'test_func': lambda message_str, p: "startsuggestions" == format_participant_message(message_str),
-        'answer': s.ROBOT_MSG_SUFFIX + "Tu viens de lancer les suggestions. Pour les arrêter, réponds 'END SUGGESTIONS'" if not s.USE_SANDBOX else "[fonction incompatible avec le mode SANDBOX]",
+        'answer': s.ROBOT_MSG_SUFFIX + s.ACTION_ADMIN_START_SUGGESTIONS if not s.USE_SANDBOX else s.ACTION_ADMIN_SANDBOX_ERROR,
         'action_func': lambda p, c, conn, m: p,
         'async_action_func': lambda p, c, conn, m,pi=None: start_suggestions(conn, p),
     },
     'END_SUGGESTIONS': {
         'name': 'END SUGGESTIONS',
         'test_func': lambda message_str, p: "endsuggestions" == format_participant_message(message_str),
-        'answer': s.ROBOT_MSG_SUFFIX + "Tu viens de stopper les suggestions. Pour les relancer, réponds 'START SUGGESTIONS'" if not s.USE_SANDBOX else "[fonction incompatible avec le mode SANDBOX]",
+        'answer': s.ROBOT_MSG_SUFFIX + s.ACTION_ADMIN_END_SUGGESTIONS if not s.USE_SANDBOX else s.ACTION_ADMIN_SANDBOX_ERROR,
         'action_func': lambda p, c, conn, m: p,
         'async_action_func': lambda p, c, conn, m,pi=None: end_suggestions(conn, p),
     },
     'EXCEPT': {
         'name': '12345ZZZ',
         'test_func': lambda message_str, p: "12345zzz" == format_participant_message(message_str),
-        'answer': s.ROBOT_MSG_SUFFIX + "Tu viens de lever une exception dans le programme. Attention c'est dangereux !",
+        'answer': s.ROBOT_MSG_SUFFIX + s.ACTION_ADMIN_RAISE_EXCEPTION,
         'action_func': lambda p, c, conn, m: p, #_raise(),
         'async_action_func': lambda p, c, conn, m,pi=None: _raise(),
     },

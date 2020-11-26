@@ -1,7 +1,7 @@
 import os
 import datetime as dt
 
-import settings as s
+from settings import settings as s
 import asyncio
 
 import daemon_loops.modules.logging as logging

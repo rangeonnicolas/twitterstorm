@@ -2,7 +2,7 @@ import datetime as dt
 import random
 
 from daemon_loops.modules.twitterstorm_utils import wait_for_next_iteration
-import settings as s
+from settings import settings as s
 from daemon_loops.modules.database import DataBase
 import daemon_loops.modules.logging as logging
 from daemon_loops.modules.telegram import TelegramConnection
