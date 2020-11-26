@@ -33,17 +33,14 @@ async def _loop_action(conn, analyser, now, last_new_participants_check, partici
             # todo_f : définir dans la conf un niveau d'enregsitrement (ts les messages ou juste ls infos
             #  necessaires?)
 
-            if participant.is_scribe():
+            if await participant.is_scribe():
                 for m in msgs:
-                    # todo_cr : !!! que se passe t'il si ME est à la fois scribe et que
-                    #  SEND_ONLY_TO_ME est activé? Plus généralement, s'assure t'on que les messages envoyés aux
-                    #  scribes ne reviennent pas ?
                     updated_participant = await analyser.analyse_message_from_scribe(m, updated_participant,
                                                                                      channel, participants_info)
-            elif conn.is_admin(participant):  # todo_es méthode à mettre plutot dans la classe participant
+            elif await conn.is_admin(participant):  # todo_es méthode à mettre plutot dans la classe participant
                 for m in msgs:
                     updated_participant = await analyser.analyse_message_from_admin(m, updated_participant,
-                                                                                    channel)
+                                                                                    channel, participants_info)
             else:
                 for m in msgs:
                     updated_participant = \

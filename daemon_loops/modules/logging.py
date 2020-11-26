@@ -45,31 +45,39 @@ def _write_in_files(level, msg, traceback = None):
 def _format_msg(msg, level):
     #date = dt.datetime.now(s.TIMEZONE).strftime("%Y-%m-%d %H:%M:%S")
     date = dt.datetime.now(s.TIMEZONE).isoformat()
-    return "[%s][%s] %s" % (date, level, msg)
+    return "[%s][%s] %s" % (date, level, msg), date
 
 class Logger:
     def __init__(self):
-        self.last_exception = dt.datetime.now(s.TIMEZONE)
+        self.last_exception = dt.datetime.now(s.TIMEZONE) - dt.timedelta(0,s.MIN_TIME_BETWEEN_TWO_ERROR_LOGGINGS)
         self.exception_counter = 0
+        self.conn = None
 
     def log(self, level, msg,  traceback = None):
+        formated_msg, date = _format_msg(msg, level)
         if level not in ['ERROR', 'CRITICAL', 'EXCEPTION']:
-            self._log(level, msg, traceback=traceback)
+            self._log(level, formated_msg, traceback=traceback)
         else:
             delta = dt.datetime.now(s.TIMEZONE) - self.last_exception
             if delta < dt.timedelta(0,s.MIN_TIME_BETWEEN_TWO_ERROR_LOGGINGS):
                 self.exception_counter += 1
             else:
+                exceptions = []
                 if self.exception_counter > 0:
-                    self._log("ERROR", "%i erreur(s) passées sous silence" % self.exception_counter) # todo_es revoir wording (plus précis)
-                self._log(level, msg,  traceback = traceback)
+                    m = "%i erreur(s) passées sous silence" % self.exception_counter # todo_es : wording, etre plus précis
+                    exceptions.append((date,"ERROR", m, m, None))
+                exceptions.append((date, level, formated_msg, msg, traceback))
+
+                for exc_date, exc_level, exc_f_msg, exc_msg, exc_tb in exceptions:
+                    self._log(exc_level, exc_f_msg, exc_tb)
+                    #if self.conn is not None:
+                    #    self.conn.notify_error_to_admin(exc_date, exc_level, exc_msg, exc_tb)
+                    # euh oui mais non en fait ça va etre asynchnrone :p
 
                 self.last_exception = dt.datetime.now(s.TIMEZONE)
                 self.exception_counter = 0
 
     def _log(self, level, msg,  traceback = None):
-        print(92783, "accès log")
-        msg = _format_msg(msg, level)
         if s.ENV_TYPE == "DEV":
             print(msg)
             if traceback is not None:
@@ -77,44 +85,55 @@ class Logger:
                 print(traceback if traceback is not None else "")
         _write_in_files(level, msg,  traceback = traceback)
 
+    def set_conn(self, conn):
+        self.conn = conn
 
 logger = Logger()
 
 def debug(msg, *args):
+    msg = str(msg) % args
     logger.log("DEBUG", msg)
 
 def info(msg, *args):
+    msg = str(msg) % args
     logger.log("INFO", msg)
 
 def warning(msg, *args):
+    msg = str(msg) % args
     logger.log("MSG", msg)
 
 # a utiliser si on peut se permettre de continuer le code qui suit l'appel à exception() [donc si l'erreur n'est pas si critique que ça]
 def error(msg, *args):
+    msg = str(msg) % args
     from daemon_loops.modules.twitterstorm_utils import TwitterstormError
     #logger.log("ERROR", msg)
     exception(TwitterstormError(msg), level = "ERROR")
 
 # a utiliser quand le code qui suit l'appel à critical ne doit pas être exécuté (en effet critical() lève une erreur)
 def critical(msg, *args):
+    msg = str(msg) % args
     from daemon_loops.modules.twitterstorm_utils import TwitterstormError
     logger.log("CRITICAL", msg)
     raise TwitterstormError(msg)
 
+# todo_es : faut il conidérer que les ereur "was never awaited" sont "critical" ?
+
 # a utiliser si on peut se permettre de continuer le code qui suit l'appel à exception() [donc si l'erreur n'est pas si critique que ça]
-def exception(e, exc_info=None, level = None):
+def exception(e, *args,exc_info=None, level = None):
     # todo_es : rapatrier à dans TgClientWrapper, une fois que l'on y aura rappartié la gestion des excaptions de get_entity et get_input_entity
     #if isinstance(e, FloodWaitError):
 
     stack = traceback.format_exc()
-    msg = "\n" + str(e)
+    msg = str(e)
+    msg = str(msg) % args  # todo_es vérifique que ça lève pas une excpetion ce serait con :p de maniere généale catcher toutes les erreurx des fonctions de logging pour par avoir d'e circularité
     if exc_info:
         stack += "\nErreur initiale:\n%s" % exc_info
 
     level = level if level is not None else "EXCEPTION"
     logger.log(level ,msg, traceback= stack)
 
-
+def set_connection(conn):
+    logger.set_conn(conn)
 
 
 

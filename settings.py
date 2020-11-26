@@ -31,19 +31,21 @@ CLIENT = "Telegram"  # todo_es : variable encore utlisée ?
 
 CAMPAIN_ID = "TwitterStrorm_2"
 
-USE_SANDBOX = True  # todo_cr
+USE_SANDBOX = False  # todo_cr
 SANDBOX_MODULE_NAME = 'sandbox_loop'
 
 NEW_LISTENING_LOOP_ITERATION_EVERY = 2 * 1000  # En milisecondes
 CHECK_NEW_PARTICIPANTS_EVERY = 5 * 1000  # En milisecondes
 NEW_SUGGESTION_LOOP_ITERATION_EVERY = 4 * 1000  # En milisecondes
 
+TIME_LIMIT_TO_FETCH_MSGS = 30 * 60 # En secondes
 
 
 
-
-
+# todo_es : changer le nom de la variable en BDD mais pas ici ;)
 DEFAULT_SUGGESTIONS = False if dt.datetime.now() < dt.datetime(2020,11,27,10,15) else True # détermine s'il faut envoyer les suggestions dès le lancement du programme (sans attendre la 'START' de l'admin
+# todo_es franchement, trouver un autre nom de variable stp
+DEFAULT_IS_CAMPAIN_OPEN = False
 
 DEFAULT_SUGGESTIONS_FREQUENCY = 1.2  # En minutes
 MIN_SUGGESTION_FREQUENCY = 0.5  # En minutes
@@ -62,15 +64,17 @@ END_SUGGESTION_LOOP = END_LISTENING_LOOP  # todo_es : à merger
 #START_SUGGESTIONS = dt.datetime.now(TIMEZONE) # todo_cr mettre à 10h le jour J
 #END_SUGGESTIONS = END_LISTENING_LOOP
 
+ROBOT_MSG_SUFFIX = "🤖 : "
+ANIMATOR_MSG_SUFFIX = "🗣 : "
 
-URL_SUGGESTION_MSG_STR = """🤖 Voici un tweet posté par un·e autre activiste (__**{}**__).
+URL_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un tweet posté par un·e autre activiste (__**{}**__).
 
 [Clique ici]({}) pour l'ouvrir, et si ce tweet te plaît, alors Like-le et Retweete-le 💪🏼 !
 
 Si tu veux que je me taise, envoies-moi '__**STOP**__' 😊 . 
 """
 
-TEXT_SUGGESTION_MSG_STR = """🤖 Voici un message que tu peux copier-coller dans un tweet.
+TEXT_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un message que tu peux copier-coller dans un tweet.
 
 Pour générer à nouveau ce message, mais en ciblant un·e autre député·e, réponds-moi __**AUTRE**__.
 """
@@ -124,7 +128,7 @@ heure.
 ça aidera les informaticien.ne.s qui m'ont donné naissance !"""]
 GOODBYE_SCRIBE_MSGS = ["Au revoir Scribe!"]
 GOODBYE_PARTICIPANT_MSGS = [
-    """🤖 Tu es sorti.e de la boucle d'interpellation. Je ne t'enverrai donc plus de message. 😊\nSi tu souhaites y  
+    ROBOT_MSG_SUFFIX + """Tu es sorti.e de la boucle d'interpellation. Je ne t'enverrai donc plus de message. 😊\nSi tu souhaites y  
 revenir plus tard, voici le lien : {}""".format(
         invite_link)]
 

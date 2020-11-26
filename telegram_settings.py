@@ -33,7 +33,7 @@ TRUSTED_USER_FOR_TWEET_VALIDATION = ME
 ADMINS = [nicolas_acp]
 
 SCRIBES_ANIMATORS = [{'tg_id' : 1499986438,
-                      'display_name' : ""}] # matthieu GP
+                      'display_name' : "Matthieu GP"}] # matthieu GP
 # todo_es : hack pas beau sur le display name !!
 
 SCRIBES_ROBOTS = [1465837192]    # Johanna Klein

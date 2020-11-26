@@ -31,7 +31,7 @@ async def _loop_action(conn, now, last_new_participants_check):
             participant = pi['participant']
             channel = pi['1to1_channel']
 
-            if not conn.is_bot(participant) and not participant.is_scribe() and not conn.is_admin(participant):
+            if not conn.is_bot(participant) and not await participant.is_scribe() and not await conn.is_admin(participant):
 
                 now = dt.datetime.now(s.TIMEZONE)
 

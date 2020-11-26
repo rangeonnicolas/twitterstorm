@@ -69,7 +69,7 @@ class DataBase:
                                    "version", "date_fetched",
                                    "last_checked_msg_id", "last_consent_modified",
                                    "specific_data", "last_arrival_in_channel", "suggestions_frequency",
-                                   "last_suggestion_url_or_text", "last_text_suggestion_id"]
+                                   "last_suggestion_url_or_text", "last_text_suggestion_id", "last_welcome_msg_received"]
         self.POSTEDTWEET_FIELDS = ["campain", "url", "date_received", "received_from", "validated"]
         self.SENDINGTASKS_FIELDS = ["campain", "version", "id_task", "time_to_send_min", "time_to_send_max", "type",
                                     "to_retweet", "fixed_msg", "percent_active_participants", "min_active_participants",
@@ -93,7 +93,8 @@ class DataBase:
                 last_arrival_in_channel date,
                 suggestions_frequency float, 
                 last_suggestion_url_or_text date,  
-                last_text_suggestion_id text
+                last_text_suggestion_id text,
+                last_welcome_msg_received date
             )                                  
         ''', []),
             ('''
@@ -257,7 +258,7 @@ class DataBase:
                        json.dumps(p.get_specific_data()), \
                        p.last_arrival_in_channel, \
                        p.suggestions_frequency, p.last_suggestion_url_or_text, \
-                       p.last_text_suggestion_id
+                       p.last_text_suggestion_id, p.last_welcome_msg_received
 
                 q = ('INSERT INTO participant({}) VALUES ({})'.format(",".join(self.PARTICIPANT_FIELDS),
                                                                       ",".join(["?"] * len(self.PARTICIPANT_FIELDS))), args)
@@ -351,6 +352,12 @@ class DataBase:
     def update_last_checked_msg(self, participant):
         q = ('UPDATE participant SET last_checked_msg_id = ?  WHERE normalised_id = ? and campain = ?',
              (participant.get_last_checked_message_id(),
+              participant.get_normalised_id(), s.CAMPAIN_ID))
+        self._execute([q])
+
+    def update_last_welcome_msg_received(self, participant):
+        q = ('UPDATE participant SET last_welcome_msg_received = ?  WHERE normalised_id = ? and campain = ?',
+             (participant.last_welcome_msg_received,
               participant.get_normalised_id(), s.CAMPAIN_ID))
         self._execute([q])
 

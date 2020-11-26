@@ -23,7 +23,7 @@ async def _loop_action(conn, now):
             participant = sb.SandboxParticipant(pi['participant'])
             channel = pi['1to1_channel']
 
-            if not conn.is_bot(participant) and not participant.is_scribe() and not conn.is_admin(participant):
+            if not conn.is_bot(participant) and not await participant.is_scribe() and not await conn.is_admin(participant):
                 planned_msgs = await participant.check_for_planned_message(now, sb.PLANNED_MESSAGES)
                 for m in planned_msgs:
                     await conn.send(participant, channel, m['message'])

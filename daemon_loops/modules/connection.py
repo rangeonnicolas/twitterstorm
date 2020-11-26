@@ -84,6 +84,22 @@ class AbstractMessage:
         logging.test(30007)
         return self.id.get_normalised_id()
 
+    def add_intro_about_sender(self, sender_name, scribe_type) -> str:
+        st = self.message_str
+        if scribe_type == "SCRIBE_ROBOT":
+            intro = s.ROBOT_MSG_SUFFIX
+        elif scribe_type == "SCRIBE_ANIMATOR":
+            # todo_es quite au hack où on ne voulait pas afficher le nom de l'animateurice, merci de remmetre cette
+            #  ligne :
+            intro = s.ANIMATOR_MSG_SUFFIX + "__**L'un·e des animateurs·ices de la mobilisation vient de " \
+                                              "t'envoyer un message :**__\n\n"
+            #intro = s.ANIMATOR_MSG_SUFFIX + "__**%s (animateur·ice), vient de t'envoyer un message :**__\n\n" % sender_name
+        else:
+            logging.critical('Option non disponible')
+        st = intro + st
+
+        return st
+
 
 class AbstractParticipant:
     def __init__(self,
@@ -98,7 +114,8 @@ class AbstractParticipant:
                  last_arrival_in_channel,
                  suggestions_frequency,
                  last_suggestion_url_or_text,
-                 last_text_suggestion_id
+                 last_text_suggestion_id,
+                 last_welcome_msg_received
                  ):
         logging.test(30008)
         self._check_id_type(id_)
@@ -114,6 +131,7 @@ class AbstractParticipant:
         self.suggestions_frequency = suggestions_frequency
         self.last_suggestion_url_or_text = last_suggestion_url_or_text
         self.last_text_suggestion_id = last_text_suggestion_id
+        self.last_welcome_msg_received = last_welcome_msg_received
 
         self.last_checked_msg_id = None
         self.set_last_checked_msg(last_checked_msg_id)
@@ -178,7 +196,8 @@ class AbstractParticipant:
                        last_arrival_in_channel,
                        suggestions_frequency,
                        last_suggestion_url_or_text,
-                       last_text_suggestion_id
+                       last_text_suggestion_id,
+                       last_welcome_msg_received
                        ):
         raise NotImplementedError()
 
@@ -200,6 +219,7 @@ class AbstractConnection(AbstractContextManager):
         await s.set_conf_var(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS_FREQUENCY', s.DEFAULT_SUGGESTIONS_FREQUENCY)
         await s.set_conf_var(s.CAMPAIN_ID, 'SEND_ONLY_TO_ME', s.SEND_ONLY_TO_ME)
         await s.set_conf_var(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS', s.DEFAULT_SUGGESTIONS)
+        await s.set_conf_var(s.CAMPAIN_ID, 'CAMPAIN_IS_OPEN', s.DEFAULT_IS_CAMPAIN_OPEN)
 
     def __enter__(self):
         """
@@ -226,7 +246,7 @@ class AbstractConnection(AbstractContextManager):
         """
 
         """
-        participants = await self._format_participants_info(self._get_db_participants(consent=consent))
+        participants = await self._format_participants_info(await self._get_db_participants(consent=consent))
         return participants
 
     async def check_for_new_participants_in_main_channel(self, first_time=False, known_participants_info=[]):
@@ -246,11 +266,12 @@ class AbstractConnection(AbstractContextManager):
 
         self._add_and_update_participants(new_participants, participants_still_here)
 
-        await self._welcome_and_say_goodbye(new_participants_info, participants_who_left_info)
+        if await s.get_conf_value(s.CAMPAIN_ID, 'CAMPAIN_IS_OPEN') or s.USE_SANDBOX:  # todo_es linguee open
+            new_participants_info = await self._welcome_and_say_goodbye(new_participants_info, participants_who_left_info)
 
         future = new_participants_info + known_participants_info
 
-        return await self._format_participants_info(self._get_db_participants())
+        return await self._format_participants_info(await self._get_db_participants())
         # todo_op: en vrai on peut optimiser un peu en n'allant pas tout rechercher dans la BDD hein
         # todo_chk : si on enleve cette ligne, plus jamais on ne va fetcher les participants
         # dans la BDD, sauf à l'ilitialisation du prog, enfin si tu le programme un jour... :s
@@ -265,7 +286,7 @@ class AbstractConnection(AbstractContextManager):
                 self.my_channel = await self._get_1to1_channel(me)
             else:
                 logging.test(30019)
-                if s.SEND_ONLY_TO_ME:
+                if await s.get_conf_value(s.CAMPAIN_ID, 'SEND_ONLY_TO_ME'):
                     # todo_chk : vérifier l'utilité d'avoir un utilisateur ME si send_only_to_me = False.
                     # todo_chk : Si pas utile, décaler le if s.SEND_ONLY_TO_ME avant l'appel de la méthode _check_me
                     logging.critical("Attention, le compte de test ME doit être présent dans le channel dédié à la " +
@@ -275,18 +296,7 @@ class AbstractConnection(AbstractContextManager):
 
     async def _welcome_and_say_goodbye(self, new_participants_info, participants_who_left_info):
 
-        for pi in new_participants_info:
-            participant = pi['participant']
-            channel = pi['1to1_channel']
-
-            if not self.is_bot(participant):
-
-                if participant.is_scribe():
-                    for m in s.WELCOME_SCRIBE_MSGS:
-                        await self.send(participant, channel, m)
-                else:
-                    for m in s.WELCOME_NEW_PARTICIPANT_MSGS:
-                        await self.send(participant, channel, m)
+        new_participants_info = await self._send_welcome_message(new_participants_info)
 
         for pi in participants_who_left_info:
             participant = pi['participant']
@@ -294,13 +304,34 @@ class AbstractConnection(AbstractContextManager):
 
             if not self.is_bot(participant):
 
-                if participant.is_scribe():
+                if await participant.is_scribe():
                     for m in s.GOODBYE_SCRIBE_MSGS:
                         await self.send(participant, channel, m)
                 else:
                     for m in s.GOODBYE_PARTICIPANT_MSGS:
                         await self.send(participant, channel, m)
 
+        return new_participants_info
+
+    async def _send_welcome_message(self, new_participants_info):
+        for i, pi in enumerate(new_participants_info):
+            participant = pi['participant']
+            channel = pi['1to1_channel']
+
+            if not self.is_bot(participant):
+
+                if await participant.is_scribe():
+                    for m in s.WELCOME_SCRIBE_MSGS:
+                        await self.send(participant, channel, m)
+                else:
+                    for m in s.WELCOME_NEW_PARTICIPANT_MSGS:
+                        await self.send(participant, channel, m)
+
+                participant.last_welcome_msg_received = dt.datetime.now(s.TIMEZONE)
+                new_participants_info[i]['participant'] = participant
+                self.db.update_last_welcome_msg_received(participant)
+
+        return new_participants_info
 
     def _add_and_update_participants(self, new_participants, participants_still_here):
         version = dt.datetime.now(s.TIMEZONE)
@@ -325,14 +356,14 @@ class AbstractConnection(AbstractContextManager):
                                          'detected': None,  # todo_chk : c'est quoi ça ?
                                          "action_token": action}])
 
-    def _get_db_participants(self, consent=None):
+    async def _get_db_participants(self, consent=None):
         """
 
         @rtype: list(AbstractParticipant)
         """
         logging.test(30025)
         return [p for p in self.db.get_participants(self._get_participant_class(), consent=consent) if
-                self._is_reachable(p)]
+                await self._is_reachable(p)]
 
     def _insert_participants(self, participants, now):
         """
@@ -368,9 +399,9 @@ class AbstractConnection(AbstractContextManager):
         @rtype: None
         """
 
-        if not s.SEND_ONLY_TO_ME:
+        if not await s.get_conf_value(s.CAMPAIN_ID, 'SEND_ONLY_TO_ME'):
             logging.test(30029)
-            if not self.is_bot(participant) and self._is_reachable(participant):
+            if not self.is_bot(participant) and await self._is_reachable(participant):
                 logging.test(30032)
                 logging.test(30033)
                 logging.test(30034)
@@ -394,14 +425,39 @@ class AbstractConnection(AbstractContextManager):
                                                                                 participant.get_normalised_id(), msg)
             await self._send_and_record_message(self.me, self.my_channel, msg)
 
-    def send_message_to_all_participants(self, message, participant, participants_info):
-        self._filter_reachable_participants(participants_info)
-        logging.test(30033)
-        return 2983879287987398792
+    async def send_message_to_all_participants(self, message, scribe, participants_info):
+        sc_id = scribe.get_normalised_id()
+        scribes_info = await s.getAllScribesInConf(s.CAMPAIN_ID)
+        message_str = message.add_intro_about_sender(scribes_info[sc_id]['name'], scribes_info[sc_id]["scribe_type"])
+        pis = await self._filter_reachable_participants(participants_info, scribe)
+        for pi in pis:
+            await self.send(pi['participant'], pi['1to1_channel'], message_str)
+        return len(pis)
 
-    def _filter_reachable_participants(self, participants_info):
+    async def send_welcome_message_to_all_participants(self, sender, participants_info):
+        scribes_ids = await s.getAllScribesInConf(s.CAMPAIN_ID)
+        pis = await self._filter_reachable_participants(participants_info, sender, exclude = scribes_ids)
+        for pi in pis:
+            participant = pi['participant']
+            lwmr = participant.last_welcome_msg_received
+            laic = participant.last_arrival_in_channel
+            new_arrival_without_welcome = lwmr <= laic
+            if lwmr is None or new_arrival_without_welcome:
+                for m in s.WELCOME_NEW_PARTICIPANT_MSGS:
+                    await self.send(participant, pi['1to1_channel'], m)
+        return len(pis)
+
+
+    async def _filter_reachable_participants(self, participants_info, sender, exclude=[]):
         logging.test(30034)
-        return "La flemme"
+        def validate(p, sender, exclude = []):
+            cond = p.is_ok
+            cond = cond and not self.is_bot(p)  # todo_es regrouper les 3 conditiond en self._is_special , ca servira ailleurs dans le code
+            cond = cond and (p.get_normalised_id() != sender.get_normalised_id())
+            cond = cond and (p.get_normalised_id() not in exclude)
+            return cond
+
+        return [pi for pi in participants_info if validate(pi['participant'], sender, exclude=exclude)]
 
     async def check_for_new_messages(self, participant, channel):
         logging.test(30035)
@@ -490,8 +546,9 @@ class AbstractConnection(AbstractContextManager):
 
     async def right_time_for_suggestions(self):
         is_ok = await s.get_conf_value(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS')
-        is_ok = is_ok if is_ok is not None else False
-        logging.error("On checke si on peut envoyer des suggestions sauf que la variable DEFAULT_SUGGESTIONS est absente de la configuration")
+        if is_ok is None:
+            logging.error("On checke si on peut envoyer des suggestions sauf que la variable DEFAULT_SUGGESTIONS est absente de la configuration")
+            is_ok = False
         return is_ok
 
     def connect(self):

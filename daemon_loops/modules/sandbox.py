@@ -136,9 +136,10 @@ class SandboxParticipant(TelegramParticipant):
             if when_to_send_the_message < now and now < it_is_a_bit_too_late_to_send_it:
                 if not await self._check_if_already_sent(message_id):
                     # todo_es quite au hack où on ne voulait pas afficher le nom de l'animateurice, merci de remmetre cette ligne :
-                    # message = "🗣 __**%s (animateur·ice de la mob.), vient de t'envoyer un message :**__\n\n%s" % (sender, message_txt)
-                    message = "🗣 __**L'un·e des animateurs·ices de la mobilisation vient de t'envoyer un message :**__\n\n%s" % (
-                        message_txt)
+                    message = s.ANIMATOR_MSG_SUFFIX + "__**L'un·e des animateurs·ices de la mobilisation vient de " \
+                                                      "t'envoyer un message :**__\n\n%s" % (message_txt)
+
+                    message = s.ANIMATOR_MSG_SUFFIX + "__**%s (animateur·ice de la mob.), vient de t'envoyer un message :**__\n\n%s" % (sender, message_txt)
 
                     to_send.append({
                         'msg_id': message_id,

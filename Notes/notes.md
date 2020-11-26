@@ -3,19 +3,11 @@
 ## Features
 
 ### Critique
-- Mode Scribe
 - Pourvoir brancher la boucle sans envoyer de message d'accueil à tout le monde
-- gestion des Exceptions (compte tg DEV)
-- quand on relance le prog, faire en sorte de ne pas analyser les msgs de moins de 30min avant. sinon si la bdd est supprimée on réanaluse touuuuuuus les messages
-
-- éditer la conf
-- todo_cr
-- relecture complète de code
 
 ### Important
 - fonction de suppression des trucs innutiles dans la BDD
 - enregistrement des clics de postage
-- relire tous les messages de logging
 - updater en temps rééel le frequences
 - analyse des perfs : logs à supprimer, BDD
 - WORDING
@@ -30,7 +22,7 @@
 - enregistrer les bugs ;)
 - pinage de 1message récap
 
-1
+
 ## wording
 - c'est mieux si les gens Répondent aux tweets
 - "postez-le entre 10:30 et 10:37 pour optimiser"
@@ -45,6 +37,7 @@
 - CHECK peut on piner un message
 - todo : n'accepter qu'un message a la fois (ex : bug https://twitter.com/actionclimat75/status/1326090258438643712 lol)
 - TW a 'til des logs chiants ? une grosse BDD?'
+- créer des users TG
 
 ## Fiabilité
 - détection des mauvaises URLs
@@ -57,23 +50,29 @@
 - vider la BDD + suppression de doublons innutiles
 - todo_op
 - normalisation des urls des tweets pour éviter les doublons + vérification de doublon avat d'insérer dans la BDD
-- bien regarder que logger.test(100037) ne ralenti pas le prog
-- revoir les print()
 
 # Tâches jour J
 
 ## J - 1
+- renommer le robos en "Nico2"
 - ajout des comptes (y compris BOT) à la boucle :
     - 1 compte DEV
     - 1 compte BOT
     - 1 compte ACT-LAMBDA
     - 1 compte SCRIBE-ANIMATOR
     - 1 compte SCRIBE-ROBOT
-- configurer les restricted users
-- brancher le prog sur la boucle SANS ENVOYER DE MESSAGE
-- préparer le balançage du msg d'accueil
-- tester avec les restricted users
-- JARTER LES RESTRICTED USERS sans envoyer LE MESSAGE d'ACCUEIL
+- liste des reachable users
+- revoir tt le wording
+- actualiser les tweets
+
+- TEST avec 5 reachable USERS :
+  - brancher le prog sur la boucle SANS ENVOYER DE MESSAGE
+  - tester l'appli avec les restricted users
+  - remettre les bons restricted users
+
+- todo_cr
+- revoir tte la conf
+
 
 ## H - 2
 - message d'accueil
@@ -82,12 +81,14 @@
 - chopper les TT
 
 ## H = 0
+- LANCER LES SUGGESTIONS ;) (start / end)
 - remplir rapidement la BDD avec les tweets
 - transférer le message de lancement
 
 ## En continu
-- trnasférer les messages des animateur.ices
+- trnasférer les messages des animateur.ices EN SIGNANT A LA FIN !!!!
 - logs des boucles : `tail -f daemon_loops/data/log/log`
+- savoir quand descendre la frequence + le notifier
 
 ## Data 
 
@@ -151,6 +152,7 @@ x nb de tweets sur twitter
   - NB : Si 2 messages ont été soumis en moins de 2 minutes, bien préciser à la recetion du 2nd message que le précédent est annulé ;)
 - faire une boucle asynchone d'envoie des messages (ainsi les boucles sandbox et suggestions n'auront plus à avoir des fonctions asynchrones)
 - interface de monitoring
+- gestion des Exceptions (à ennvoyer sur le cpt DEV)
 
 ## optim
 - todo_chk

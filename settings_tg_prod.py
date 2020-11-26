@@ -7,7 +7,7 @@ REACHABLE_USERS = [
     483278428,    # Nico @nicolas_acp
     1499986438,   # Matthieu GP (Linda GP)
     1465837192,   # Johanna Klein ANV-Lyon
-    1097550906,   # [🤖ROBOT]
+    1097550906,   # [ROBOT]
 ] # todo_f : inclure dans la conf dynamique
 
 

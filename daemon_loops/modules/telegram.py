@@ -154,7 +154,8 @@ class TelegramParticipant(AbstractParticipant):
                  last_arrival_in_channel,
                  suggestions_frequency,
                  last_suggestion_url_or_text,
-                 last_text_suggestion_id
+                 last_text_suggestion_id,
+                 last_welcome_msg_received
                  ):
         logging.test(20026)
         id_ = TelegramParticipantId(tg_id)
@@ -182,7 +183,8 @@ class TelegramParticipant(AbstractParticipant):
                                      last_arrival_in_channel,
                                      suggestions_frequency,
                                      last_suggestion_url_or_text,
-                                     last_text_suggestion_id
+                                     last_text_suggestion_id,
+                                     last_welcome_msg_received
                                      )
 
         self.tg_specific_data = {
@@ -221,9 +223,11 @@ class TelegramParticipant(AbstractParticipant):
             self.last_checked_msg_id.get_normalised_id()) if self.last_checked_msg_id is not None else None
         # todo_chk : j'ai l'impression que c'est dégeu mais j'en suis pas sur
 
-    def is_scribe(self):
+    async def is_scribe(self):
         logging.test(20035)
-        return self.get_tg_id() in (ts.SCRIBES_ANIMATORS + ts.SCRIBES_ROBOTS)
+        scribes_info = await s.getAllScribesInConf(s.CAMPAIN_ID) # todo_op : prendre tous les scribes ? ne pas faire l'appel une fois avant de prendre en revue tous les participants?
+        scribes_ids = scribes_info.keys()
+        return self.get_normalised_id() in scribes_ids
 
     def get_specific_data(self) -> dict:
         logging.test(20036)
@@ -251,7 +255,8 @@ class TelegramParticipant(AbstractParticipant):
                        last_arrival_in_channel,
                        suggestions_frequency,
                        last_suggestion_url_or_text,
-                       last_text_suggestion_id
+                       last_text_suggestion_id,
+                       last_welcome_msg_received
                        ) -> AbstractParticipant:
 
         tg_specific_data = json.loads(specific_data)
@@ -272,6 +277,8 @@ class TelegramParticipant(AbstractParticipant):
         date_fetched = dateutil.parser.isoparse(date_fetched)
         last_consent_modified = dateutil.parser.isoparse(last_consent_modified)
         last_arrival_in_channel = dateutil.parser.isoparse(last_arrival_in_channel)
+        if last_welcome_msg_received is not None:
+            last_welcome_msg_received = dateutil.parser.isoparse(last_welcome_msg_received)
         if last_suggestion_url_or_text is not None:
             last_suggestion_url_or_text = dateutil.parser.isoparse(last_suggestion_url_or_text)
 
@@ -289,7 +296,8 @@ class TelegramParticipant(AbstractParticipant):
             last_arrival_in_channel,
             suggestions_frequency,
             last_suggestion_url_or_text,
-            last_text_suggestion_id
+            last_text_suggestion_id,
+            last_welcome_msg_received
         )
 
 class TelegramClientWrapper:
@@ -300,7 +308,7 @@ class TelegramClientWrapper:
             try:
                 res = self.client.connect()
             except Exception as e:
-                res = None  # todo_cr : faut bien gérer l'exception ici
+                res = None
                 logging.exception(e)
             return res
 
@@ -330,7 +338,6 @@ class TelegramClientWrapper:
             return self.client.get_entity(*args, **kwargs)
 
         def is_user_authorized(self):
-            print(555555555555)
             return self.client.is_user_authorized()
 
         def sign_in(self, *args, **kwargs):
@@ -405,13 +412,12 @@ class TelegramConnection(AbstractConnection):
             await s.addParticipantToConf(s.CAMPAIN_ID, norm_id, 'SCRIBE_ANIMATOR', display_name_for_animators=name)
         await s.set_conf_var(s.CAMPAIN_ID, 'RESTRICT_REACHABLE_USERS', ts.RESTRICT_REACHABLE_USERS)
 
-
-    def _is_reachable(self, participant):
+    async def _is_reachable(self, participant):
         """
         Overrides method in AbstractConnection
         """
         logging.test(20042)
-        return self._is_id_reachable(participant.get_normalised_id())
+        return await self._is_id_reachable(participant.get_normalised_id())
 
     def connect(self):
         """
@@ -482,13 +488,13 @@ class TelegramConnection(AbstractConnection):
         logging.test(20053)
         return participant.get_normalised_id() == TelegramParticipantId(ts.BOT).get_normalised_id()
 
-    def is_admin(self, participant):
+    async def is_admin(self, participant) -> bool:
         """
         Overrides method in AbstractConnection.
         Vérifie si le/la participant.e est le robot
         """
         logging.test(20101)
-        admins = [TelegramParticipantId(a).get_normalised_id() for a in ts.ADMINS]
+        admins = await s.get_all_admins_ids(s.CAMPAIN_ID)
         return participant.get_normalised_id() in admins
 
 
@@ -521,6 +527,7 @@ class TelegramConnection(AbstractConnection):
             if last_checked_message_tg_id is not None else {}
 
         messages = await self.tg_client.get_messages(channel.get_tg_channel(), ts.NB_MSG_TO_FETCH, **kwargs)
+        messages = [m for m in messages if m.date > dt.datetime.now(s.TIMEZONE) - dt.timedelta(0,s.TIME_LIMIT_TO_FETCH_MSGS)]
 
         if len(messages):
             logging.test(20058)
@@ -595,7 +602,6 @@ class TelegramConnection(AbstractConnection):
 
     async def _user_authentification(self):
         # Si l'utilisateur n'est pas authentifié, ...
-        print(297376872,type(self.tg_client))
         if not await self.tg_client.is_user_authorized():
 
             # ... on lui envoie le code de validation sur son Télégram.
@@ -697,7 +703,7 @@ class TelegramConnection(AbstractConnection):
 
         if first_time:
             logging.test(20082)
-            known_participants = self._get_db_participants()
+            known_participants = await self._get_db_participants()
         else:  ###
             logging.test(20083)
 
@@ -716,11 +722,12 @@ class TelegramConnection(AbstractConnection):
 
         new_participants = []
 
+        default_sug_freq = await s.get_conf_value(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS_FREQUENCY')
 
         for p in tg_new_participants:
             logging.test(20084)
             normalised_id = TelegramParticipantId(p.id).get_normalised_id()
-            if self._is_id_reachable(normalised_id):
+            if await self._is_id_reachable(normalised_id):
                 logging.test(20085)
                 new_participant = TelegramParticipant(
                     s.CAMPAIN_ID,
@@ -734,7 +741,8 @@ class TelegramConnection(AbstractConnection):
                     None,
                     None,
                     now,
-                    max(s.DEFAULT_SUGGESTIONS_FREQUENCY, s.MIN_SUGGESTION_FREQUENCY),
+                    max(default_sug_freq, s.MIN_SUGGESTION_FREQUENCY),
+                    None,
                     None,
                     None,
                 )
@@ -763,18 +771,19 @@ class TelegramConnection(AbstractConnection):
         await self.tg_client.send_message(channel.get_tg_channel(), msg)
 
     @staticmethod
-    def _is_id_reachable(participant_id):
+    async def _is_id_reachable(participant_id):
         """
         Indique s'il est possible d'interragir avec un participant donné (envoi de messages, etc.).
         """
 
         # todo_es ext_set = pas tres bo. variable d'environneemnt?
-        reachable_participants = ts.REACHABLE_USERS + [ts.ME]
+        reachable_participants = await s.get_reachable_participants_ids(s.CAMPAIN_ID)
+        reachable_participants.append(TelegramParticipantId(ts.ME).get_normalised_id())
         # self._get_participants_new_from_channel
-        reachable_participants = [TelegramParticipantId(id_).get_normalised_id() for id_ in reachable_participants]
+        #reachable_participants = [TelegramParticipantId(id_).get_normalised_id() for id_ in reachable_participants]
         # reachable_participants = [int(e) if type(e) == str else e for e in reachable_participants]
 
-        if not ts.RESTRICT_REACHABLE_USERS:
+        if not await s.get_conf_value(s.CAMPAIN_ID, 'RESTRICT_REACHABLE_USERS'):
             logging.test(20090)
             return True
         else:
@@ -811,7 +820,7 @@ class TelegramConnection(AbstractConnection):
         title = main_channel.title if main_channel is not None else "[Channel non trouvé]"
         msg = "\nListe des participants du channel '{}'".format(title)
         msg += " contenant '{}':".format(search) if search is not None else ":"
-        if ts.RESTRICT_REACHABLE_USERS :
+        if await s.get_conf_value(s.CAMPAIN_ID, 'RESTRICT_REACHABLE_USERS'):  # todo_chk est ce que la BDD a été initialisée avec la conf avant d'arriver ici?
             msg += "\n\n! ATTENTION :\nDans le fichier de configuration, RESTRICT_REACHABLE_USERS " \
             "est à True, ce qui restreint les utilisateurs affichés ici.\n"
         print(msg)

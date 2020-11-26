@@ -84,6 +84,28 @@ def getParticipantInConf(campain_id, participant_norm_id, type) -> (ConfigPartic
     else:
         return None, cls
 
+@sync_to_async
+def getAllScribesInConf(campain_id) -> dict:  # todo_es kamelkase??
+    result = {}
+    for type in ["SCRIBE_ANIMATOR", "SCRIBE_ROBOT"]:
+        cls = get_class_according_to_type(type)
+        objs = cls.objects.filter(campain_id=campain_id)
+        result.update({o.participant_id:
+                           {'scribe_type': type,
+                            'name': o.display_name_for_animators}
+                        for o in objs})
+    return result
+
+@sync_to_async
+def get_all_admins_ids(campain_id) -> list:
+    objs = ConfigAdmins.objects.filter(campain_id=campain_id)
+    return [o.participant_id for o in objs]
+
+@sync_to_async
+def get_reachable_participants_ids(campain_id) -> list:
+    objs = ConfigReachableParticipants.objects.filter(campain_id=campain_id)
+    return [o.participant_id for o in objs]
+
 async def set_conf_var(campain_id, key, value):
     kwargs = {'campain_id': campain_id, 'key': key}
     if isinstance(value, bool):
