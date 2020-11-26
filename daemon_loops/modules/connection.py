@@ -319,19 +319,23 @@ class AbstractConnection(AbstractContextManager):
             channel = pi['1to1_channel']
 
             if not self.is_bot(participant):
+                updated_participant = await self._send_welcome_message_to_scribe_or_participant(participant, channel)
+                new_participants_info[i]['participant'] = updated_participant
 
-                if await participant.is_scribe():
-                    for m in s.WELCOME_SCRIBE_MSGS:
-                        await self.send(participant, channel, m)
-                else:
-                    for m in s.WELCOME_NEW_PARTICIPANT_MSGS:
-                        await self.send(participant, channel, m)
-
-                participant.last_welcome_msg_received = dt.datetime.now(s.TIMEZONE)
-                new_participants_info[i]['participant'] = participant
-                self.db.update_last_welcome_msg_received(participant)
 
         return new_participants_info
+
+    async def _send_welcome_message_to_scribe_or_participant(self, participant, channel):
+        if await participant.is_scribe():
+            for m in s.WELCOME_SCRIBE_MSGS:
+                await self.send(participant, channel, m)
+        else:
+            for m in s.WELCOME_NEW_PARTICIPANT_MSGS:
+                await self.send(participant, channel, m)
+
+        participant.last_welcome_msg_received = dt.datetime.now(s.TIMEZONE)
+        self.db.update_last_welcome_msg_received(participant)
+        return participant
 
     def _add_and_update_participants(self, new_participants, participants_still_here):
         version = dt.datetime.now(s.TIMEZONE)
@@ -435,17 +439,19 @@ class AbstractConnection(AbstractContextManager):
         return len(pis)
 
     async def send_welcome_message_to_all_participants(self, sender, participants_info):
-        scribes_ids = await s.getAllScribesInConf(s.CAMPAIN_ID)
-        pis = await self._filter_reachable_participants(participants_info, sender, exclude = scribes_ids)
-        for pi in pis:
+        #scribes_ids = await s.getAllScribesInConf(s.CAMPAIN_ID)
+        pis = await self._filter_reachable_participants(participants_info, sender) #, exclude = scribes_ids)
+        for i, pi in enumerate(pis):
             participant = pi['participant']
+            channel = pi['1to1_channel']
+
             lwmr = participant.last_welcome_msg_received
             laic = participant.last_arrival_in_channel
-            new_arrival_without_welcome = lwmr <= laic
-            if lwmr is None or new_arrival_without_welcome:
-                for m in s.WELCOME_NEW_PARTICIPANT_MSGS:
-                    await self.send(participant, pi['1to1_channel'], m)
-        return len(pis)
+            if lwmr is None or lwmr <= laic:
+                updated_participant = await self._send_welcome_message_to_scribe_or_participant(participant, channel)
+                pis[i]['participant'] = updated_participant
+
+        return pis
 
 
     async def _filter_reachable_participants(self, participants_info, sender, exclude=[]):

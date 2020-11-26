@@ -85,7 +85,8 @@ async def end_suggestions(conn,p):
 async def open_campain(conn, p, participants_info):
     if not s.USE_SANDBOX:
         await s.set_conf_var(s.CAMPAIN_ID, 'CAMPAIN_IS_OPEN', True)
-        await conn.send_welcome_message_to_all_participants(p, participants_info)
+        # todo_es j'espère que participants_info est bien updaté.
+        participants_info = await conn.send_welcome_message_to_all_participants(p, participants_info)
     return p
 
 async def close_campain(conn, p):
