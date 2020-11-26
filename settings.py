@@ -31,7 +31,7 @@ CLIENT = "Telegram"  # todo_es : variable encore utlisée ?
 
 CAMPAIN_ID = "TwitterStrorm_2"
 
-USE_SANDBOX = False  # todo_cr
+USE_SANDBOX = True  # todo_cr
 SANDBOX_MODULE_NAME = 'sandbox_loop'
 
 NEW_LISTENING_LOOP_ITERATION_EVERY = 2 * 1000  # En milisecondes

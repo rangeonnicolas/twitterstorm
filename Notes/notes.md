@@ -3,7 +3,6 @@
 ## Features
 
 ### Critique
-- Pourvoir brancher la boucle sans envoyer de message d'accueil à tout le monde
 
 ### Important
 - fonction de suppression des trucs innutiles dans la BDD
