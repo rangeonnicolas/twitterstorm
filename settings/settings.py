@@ -92,7 +92,7 @@ TEXT_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un message que tu peux pos
 Pour générer à nouveau ce message, mais en ciblant un·e autre député·e, réponds-moi __**AUTRE**__, ou __**STOP**__ \
 pour me faire taire 😊.
 
-Pour optimiser nos chances vis-à-vis de l'algorithme de Twitter, l'idéal serait de le poster entre {} et {}.
+Pour optimiser nos chances vis-à-vis de l'algorithme de Twitter, l'idéal serait de le poster entre __**{}**__ et __**{}**__.
 """
 # todo_es : " mais en ciblant un·e autre député·e" trop spécifique
 

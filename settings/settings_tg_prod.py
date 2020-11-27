@@ -17,7 +17,7 @@ REACHABLE_USERS = [
     #629528913,   # ] : 'Anv2 A Pauline'
     827840716,   # ] : 'Baptiste B Coor'
     847535200,   # ] : 'Lrean robin Coor B'
-    #959532445,   # ] : 'Chloé B'
+    959532445,   # ] : 'Chloé B'
     #635446369,   # ] : 'Vincent B'
 ]
 
