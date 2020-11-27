@@ -102,14 +102,13 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'django_TS',
+            'NAME': 'django_ts',
             'USER': 'django',
-            'PASSWORD': os.environ.get('TS_POSTGRES_PW'),
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
+#            'PASSWORD': '',
+#            'HOST': '127.0.0.1',
+#            'PORT': '5432',
         }
     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
