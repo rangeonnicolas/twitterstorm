@@ -5,8 +5,9 @@ import pickle
 import re
 import sqlite3
 from shutil import copyfile
+import daemon_loops.modules.logging as logging
 
-import daemon_loops.settings as s
+from settings import settings as s
 
 
 class DataBase:
@@ -40,12 +41,12 @@ class DataBase:
                     if except_func is not None:
                         except_func(e)
                     else:
-                        raise e
+                        logging.error(e)
             except Exception as e:
                 if except_func is not None:
                     except_func(e)
                 else:
-                    raise e  # todo_critical erreur non catchée
+                    logging.error(e)
         if res is None:
             result = None
         else:
@@ -68,7 +69,7 @@ class DataBase:
                                    "version", "date_fetched",
                                    "last_checked_msg_id", "last_consent_modified",
                                    "specific_data", "last_arrival_in_channel", "suggestions_frequency",
-                                   "last_suggestion_url_or_text", "last_text_suggestion_id"]
+                                   "last_suggestion_url_or_text", "last_text_suggestion_id", "last_welcome_msg_received"]
         self.POSTEDTWEET_FIELDS = ["campain", "url", "date_received", "received_from", "validated"]
         self.SENDINGTASKS_FIELDS = ["campain", "version", "id_task", "time_to_send_min", "time_to_send_max", "type",
                                     "to_retweet", "fixed_msg", "percent_active_participants", "min_active_participants",
@@ -92,7 +93,8 @@ class DataBase:
                 last_arrival_in_channel date,
                 suggestions_frequency float, 
                 last_suggestion_url_or_text date,  
-                last_text_suggestion_id text
+                last_text_suggestion_id text,
+                last_welcome_msg_received date
             )                                  
         ''', []),
             ('''
@@ -256,7 +258,7 @@ class DataBase:
                        json.dumps(p.get_specific_data()), \
                        p.last_arrival_in_channel, \
                        p.suggestions_frequency, p.last_suggestion_url_or_text, \
-                       p.last_text_suggestion_id
+                       p.last_text_suggestion_id, p.last_welcome_msg_received
 
                 q = ('INSERT INTO participant({}) VALUES ({})'.format(",".join(self.PARTICIPANT_FIELDS),
                                                                       ",".join(["?"] * len(self.PARTICIPANT_FIELDS))), args)
@@ -295,9 +297,7 @@ class DataBase:
                 "where campain = '{}'                        ".format(s.CAMPAIN_ID) + \
                 "      and normalised_id in ('{}')             ".format("','".join(ids))
 
-            print(83784,"\n\nVoici la query:" + q + "\n\n")
             result = [row[0] for row in self._select(q, [])]
-            print(37834,"\n\nVoici le result:" + str(result) + "\n\n")
 
 
             return result
@@ -329,8 +329,8 @@ class DataBase:
         self._execute(queries)
 
     def update_participant_consent(self, p, is_ok):
-        p.is_ok = is_ok  # todo : ouais c'est un peu chelou de modifier p dans la classe DATABASE...
-        # todo : je pense qqu'on a pas besoin de last_consent_modified
+        p.is_ok = is_ok  # todo_chk : ouais c'est un peu chelou de modifier p dans la classe DATABASE...
+        # todo_chk : je pense qqu'on a pas besoin de last_consent_modified
         now = dt.datetime.now(s.TIMEZONE)
         q = ('UPDATE participant SET is_ok = ?, last_consent_modified = ?  WHERE normalised_id = ? and campain = ?',
              (is_ok, now, p.get_normalised_id(), s.CAMPAIN_ID))
@@ -355,6 +355,12 @@ class DataBase:
               participant.get_normalised_id(), s.CAMPAIN_ID))
         self._execute([q])
 
+    def update_last_welcome_msg_received(self, participant):
+        q = ('UPDATE participant SET last_welcome_msg_received = ?  WHERE normalised_id = ? and campain = ?',
+             (participant.last_welcome_msg_received,
+              participant.get_normalised_id(), s.CAMPAIN_ID))
+        self._execute([q])
+
     def _dump(self):
         copyfile(self.db_file,
-                 re.sub('.db$', '', self.db_file) + str(dt.datetime.now(s.TIMEZONE)) + '.db')  # todo : wowowow!
+                 re.sub('.db$', '', self.db_file) + str(dt.datetime.now(s.TIMEZONE)) + '.db')  # todo_chk

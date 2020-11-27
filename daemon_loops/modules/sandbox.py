@@ -2,113 +2,29 @@ from asgiref.sync import sync_to_async
 
 from daemon_loops.models import SentPlannedMessage, PostedTweet
 from daemon_loops.modules.telegram import TelegramParticipant
-from daemon_loops.settings import END_LISTENING_LOOP, TIMEZONE, CAMPAIN_ID
+from settings.settings import CAMPAIN_ID
 import datetime as dt
-
-DEBUT = 1.5 * 60  # en secondes # todo : remetre à 2*60
-NEW_SANDBOX_LOOP_ITERATION_EVERY = 20 * 1000
-END_SANDBOX_LOOP = END_LISTENING_LOOP
-MESSAGE_EXPIRATION = 2 * 60  # En secondes. Définit le délai au dlà duquel il esyt trop tard pour envoyer un planned
-# message
-TIME_BEFORE_SUGGESTING = dt.timedelta(0, DEBUT + 60)
-
-orig_tweets = ["https://twitter.com/VignonVirginie/status/1329722635572416512",
-               "https://twitter.com/fredjoz/status/1329712809307942912",
-               "https://twitter.com/alma_dufour/status/1329718727256977408",
-               "https://twitter.com/attac_fr/status/1329724618945523713",
-               "https://twitter.com/MarseilleAnv/status/1329717239579336734",
-               "https://twitter.com/ElodieNace/status/1329726146406215680",
-               "https://twitter.com/CharlieFleurene/status/1329477205949353989",
-               "https://twitter.com/fredjoz/status/1329712809307942912",
-               "https://twitter.com/CruzPcruz62/status/1329714776390447105"]
+from settings import settings as s
+from settings.sandbox_settings import MESSAGE_EXPIRATION, orig_tweets, ANIMATOR_MSG_INTRO
 
 import re
 
-for t in orig_tweets:
+TIMEZONE = s.TIMEZONE
+
+
+@sync_to_async
+def wesh(t):  # todo_es : pas bo
     PostedTweet(campain_id=CAMPAIN_ID,
                 url=t,
                 date_received=dt.datetime.now(TIMEZONE),
-                sender_id="salut_les_gens",
-                sender_name=re.findall("twitter\.com/([^/]+)/", t)[0],
-                ).save()  # todo : faire un dédoublonnage? et une normalisation d'url (enlever les arguments GET)
-
-PLANNED_MESSAGES = {
-    "pm_1": {
-        'seconds_after_participant_arrival_in_loop': DEBUT,
-        'sender': "Matthieu",
-        'msg': """🔥🔥 C'EST PARTI !!! 🔥🔥 \
-        
-Je viens de lancer le \
-[thread du compte Amis de la Terre](https://twitter.com/amisdelaterre/status/1326088376106311682) , \
-vont venir aussi des thread sur les comptes \
-ANV et Action Climat Paris ! Vous pouvez RT et tweeter !"""},
-    "pm_2": {
-        'seconds_after_participant_arrival_in_loop': 3 * 60,
-        'sender': "Johanna",
-        'msg': """3 mots en TT à utiliser massivement pour devenir viral :
-👉 Amazon 
-👉 #MardiConseil
-👉 #TousContreMacronJour43
-
-Amusez-vous ! 😸"""},
-    "pm_3": {
-        'seconds_after_participant_arrival_in_loop': DEBUT + 20,
-        'sender': "Matthieu",
-        'msg': """Voici le tweet acp : https://twitter.com/actionclimat75/status/1326090258438643712, 
-à relayer massivement !"""},
-    "pm_4": {
-        'seconds_after_participant_arrival_in_loop': 6 * 60,
-        'sender': "Johanna",
-        'msg': """#AmazonMacronComplice en TT : 5ème place !! 
-🤩 On assure grave ! 🤩
-🔥 On lâche rien ! 🔥"""},
-    "pm_5": {
-        'seconds_after_participant_arrival_in_loop': 9 * 60,
-        'sender': "Johanna",
-        'msg': """Pour celles et ceux qui ont encore le temps, on continue ! Le #AmazonMacronComplice est toujours 
-en trending topics !"""},
-    "pm_6": {
-        'seconds_after_participant_arrival_in_loop': 12 * 60,
-        'sender': "Johanna",
-        'msg': """Déjà 1359 tweets avec le #AmazonMacronComplice, toujours en TT sur Twitter, bravo🙌👏 ! Encore 
-plein de député·es (https://docs.google.com/spreadsheets/d/14hlESe13pL_AoF0_DSyIWo9-OebnG28i1FODEiaH310/edit#gid=0) 
-n'ont pas eu leur petit tweet. Il ne faut pas les lâcher et les mettre devant leurs responsabilités 
-!"""},
-    "pm_7": {
-        'seconds_after_participant_arrival_in_loop': 17 * 60,
-        'sender': "Johanna",
-        'msg': """Un grand MERCI à toutes et tous pour votre détermination ce matin ! 🔥🔥On a encore fait pas mal de 
-bruit et vos punchlines nous ont fait rêver 🤩 
-
-Pour celles et ceux qui ont loupé le train ce matin, il est toujours possible de continuer ce midi avec #StopAmazon 
-et #AmazonMacronComplice ! N'hésitez pas à utiliser au max les ressources à votre dispositions : chiffres clés, 
-memes, visuels ...
-
-La journée n'est pas finie : à partir de 14h nous allons lancer cet outil d'interpellation qui permet d'envoyer un 
-mail aux député.e.s de son choix. 
-
-À relayer sur vos RS respectifs. 
-
-Pour participer, il faut 
-- cliquer sur ce lien : 
-https://www.stop-amazon.fr/StopAmazon-interpellez-un-e-depute-e
-- sélectionner un ou des députés en choisissant un département puis quel(s) député on veut contacter. (on peut bien 
-sûr renouveler avec un autre département)
-- renseigner son nom, prénom, mail
-- cocher les cases et envoyer
-- pour finaliser votre envoi il faudra ensuite confirmer votre action en ouvrant votre boîte mail.
-
-N'hésitez pas s'il y a des choses pas claires"""}
-}
+                sender_id="une personne",
+                sender_name=re.findall(r"twitter\.com/([^/]+)/", t)[0],
+                ).save()
 
 
-def switch(cond):
-    return True
-
-
-def switch2(participant):
-    return (participant.last_arrival_in_channel + TIME_BEFORE_SUGGESTING) < dt.datetime.now(TIMEZONE)
-
+async def populate():
+    for t in orig_tweets:
+        await wesh(t)
 
 
 class SandboxParticipant(TelegramParticipant):
@@ -120,7 +36,7 @@ class SandboxParticipant(TelegramParticipant):
 
         for message_id, message_data in msgs.items():
 
-            delta = dt.timedelta(0,message_data['seconds_after_participant_arrival_in_loop'])
+            delta = dt.timedelta(0, message_data['seconds_after_participant_arrival_in_loop'])
             sender = message_data['sender']
             message_txt = message_data['msg']
 
@@ -128,35 +44,34 @@ class SandboxParticipant(TelegramParticipant):
             it_is_a_bit_too_late_to_send_it = when_to_send_the_message + dt.timedelta(0, MESSAGE_EXPIRATION)
 
             if when_to_send_the_message < now and now < it_is_a_bit_too_late_to_send_it:
-                if not await self._check_if_already_sent(message_id):  # todo : attention à bien checker qu'il a déjà
-                    # été envoyé APRES le last_arrival, car il a peut etre été envoyé avant, puis il est parti de la boucle puis revenu :)
-                    message = "🗣 __**%s (animateur·ice de la mob.), vient de t'envoyer un message :**__\n\n%s" % (
-                    sender, message_txt)
+                if not await self._check_if_already_sent(message_id):
+                    message = s.ANIMATOR_MSG_SUFFIX + ANIMATOR_MSG_INTRO % (sender, message_txt)
+
                     to_send.append({
-                        'msg_id' : message_id,
-                        'message' : message,
+                        'msg_id': message_id,
+                        'message': message,
                     })
 
         return to_send
 
     @sync_to_async
     def _check_if_already_sent(self, message_id):
-        print(22)
         objs = SentPlannedMessage.objects.filter(
-            campain_id = CAMPAIN_ID,
+            campain_id=CAMPAIN_ID,
             receiver_id=self.get_normalised_id(),
             planned_message_id=message_id,
             sent_at__gte=self.last_arrival_in_channel
         )
-        print(objs)
         return len(objs) >= 1
 
     @sync_to_async
-    def record_planned_message(self, m):  # todo : cette méthode devrait plutot etre dans la classe sandbox_connection (les autres aussi?)
+    def record_planned_message(self,
+                               m):  # todo_es : cette méthode devrait plutot etre dans la classe sandbox_connection (
+        #                               les autres aussi?)
         SentPlannedMessage(
-            campain_id = CAMPAIN_ID,
-            planned_message_id = m['msg_id'],
-            sent_at = dt.datetime.now(TIMEZONE),
-            receiver_id = self.get_normalised_id(),  # todo : a transformer en foreign key quand on pourra
-            sent_text = m['message']
+            campain_id=CAMPAIN_ID,
+            planned_message_id=m['msg_id'],
+            sent_at=dt.datetime.now(TIMEZONE),
+            receiver_id=self.get_normalised_id(),  # todo_es : a transformer en foreign key quand on pourra
+            sent_text=m['message']
         ).save()

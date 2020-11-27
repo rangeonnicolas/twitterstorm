@@ -5,7 +5,8 @@ from daemon_loops.modules.telegram import TelegramClientWrapper
 from listening_loop import main_listening_loop
 import datetime as dt
 import json
-from daemon_loops.modules.logger import create_dirs_if_not_exists
+import daemon_loops.modules.logging as logging
+from daemon_loops.modules.twitterstorm_utils import create_dirs_if_not_exists
 import os
 import pickle
 from dateutil.parser import parse
@@ -138,7 +139,7 @@ class Recorder:
         if data_id not in self.recorded_data.keys():
             self.recorded_data[data_id] = {}
         if type(data) != str and type(data) != bytes:
-            raise TwitterstormError("L'argument 'data' doit être de type 'str' or 'bytes'")
+            logging.critical("L'argument 'data' doit être de type 'str' or 'bytes'")
         timestamp_key = (dt.datetime.now() - self.started_at).microseconds
         self.recorded_data[data_id][timestamp_key] = data
 
@@ -152,18 +153,19 @@ class Recorder:
                 for data_id, value in self.recorded_data.items():
                     for datetime, data in value.items():
                         f.write("%s\t%s\t%s\n" % (data_id, datetime, data))
-            print("\n\n\n\n\nSAAAAAVED!!!! youhouhplaboum\n")
 
         return to_serve
 
 def run():
+    # todo_
     from daemon_loops.modules.database import DataBase
-    from daemon_loops.modules.logger import logger
+    import daemon_loops.modules.logging as logging
     from daemon_loops.modules.participants_actions import actions
     from daemon_loops.modules.telegram import TelegramConnection
-    from daemon_loops.modules.twitterstorm_utils import init, MessageAnalyser
-    import settings as s
-    import telegram_settings as ts
+    from daemon_loops.modules.twitterstorm_utils import init
+    import daemon_loops.modules.settings as s
+    import daemon_loops.modules.telegram_settings as ts
+    from daemon_loops.modules.message_analyser import MessageAnalyser
 
     init()
     db = DataBase()

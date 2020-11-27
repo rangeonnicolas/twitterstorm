@@ -1,7 +1,7 @@
 import datetime as dt
 import random
 import re
-
+import logging
 
 class MessageGenerator:
 
@@ -28,7 +28,7 @@ class MessageGenerator:
         try:
             res = random.choice(possible_messages[0])
         except IndexError:
-            # todo : signaler à l'utilisateur que c'est la merde
+            # todo_f : signaler à l'utilisateur que c'est la merde
             res = ""
         return res
 
@@ -52,7 +52,10 @@ class MessageGenerator:
             elif type(part) == list:
                 choices = choices + MessageGenerator._generate_all_possibilities(choice)
             else:
-                print(
+                # todo_es : analyser ça dès le début du lancement et lancer un logging.critical et interrompre le prgramme.
+                #  ou bien, en vue d'ajouter les alternativ messages dynamique, retourner [] mais faire en sorte que le programme
+                #  choisisse un autre message alternatif. Oui c'est mieux plutôt
+                logging.error(
                     "La variable MESSAGES est mal formée aux alentours de : " + part +
                     ". Seules les Strings ou les listes sont autorisées")
 
@@ -77,7 +80,7 @@ class MessageGenerator:
             elif type(part) == list:
                 alternatives = MessageGenerator._add_a_multiple_part(alternatives, part)
             else:
-                print(
+                logging.error(
                     "La variable MESSAGES est mal formée aux alentours de : " + part +
                     ". Seuls les Strings ou les listes sont autorisées")
 
