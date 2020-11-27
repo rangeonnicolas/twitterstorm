@@ -81,17 +81,20 @@ ANIMATOR_MSG_INTRO = "__**L'un·e des animateurs·ices de la mobilisation vient 
 SEND_ONLY_TO_ME_INTRO = "Message initialement destiné à \n{}\n(id={}) :\n\n{}"
 
 URL_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un tweet posté par un·e autre activiste (__**{}**__).
-
-[Clique ici]({}) pour l'ouvrir, et si ce tweet te plaît, alors Like-le et Retweete-le 💪🏼 !
+[Clique ici]({}) pour l'ouvrir, et si ce tweet te plaît, alors [Like-le]({}) et [Retweete-le]({}) 💪🏼 ! Et si tu est vraiment \
+déterminé·e, tu peux même y [répondre][{}] !
 
 Si tu veux que je me taise, envoies-moi '__**STOP**__' 😊 . 
 """
 
-TEXT_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un message que tu peux copier-coller dans un tweet.
+TEXT_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un message que tu peux poster en [cliquant ici]({}).
 
-Pour générer à nouveau ce message, mais en ciblant un·e autre député·e, réponds-moi __**AUTRE**__.
+Pour générer à nouveau ce message, mais en ciblant un·e autre député·e, réponds-moi __**AUTRE**__, ou __**STOP**__ \
+pour me faire taire 😊.
+
+Pour optimiser nos chances vis-à-vis de l'algorithme de Twitter, l'idéal serait de le poster entre {} et {}.
 """
-
+# todo_es : " mais en ciblant un·e autre député·e" trop spécifique
 
 
 
@@ -122,12 +125,12 @@ if not USE_SANDBOX:
     # todo_es : pas à la bonne place
     invite_link = "https://t.me/joinchat/I-xqAEUulztdUOz-RTsOdQ"
     animateurices = ""
-    boucle = '[DEMO] 🛒 surprod - comm Interpellation'
+    boucle = '🛒 surprod - comm Interpellation'
     debut_str = '__**Vendredi 27 nov à 10h**__'
 else:
     invite_link = "https://t.me/joinchat/I-xqAEUulztdUOz-RTsOdQ"                  # todo_es : pas vraiment le bon lien
     animateurices = "(__**Johanna et Matthieu**__)"
-    boucle = '🛒 surprod - comm Interpellation'
+    boucle = '[DEMO] 🛒 surprod - comm Interpellation'
     debut_str = "dans :\n__**2MINUTES**__"
 
 
@@ -174,11 +177,11 @@ WELCOME_NEW_PARTICIPANT_MSGS = ["""
 Bonjour ! 
 Merci de participer à l'action d'interpellation contre Amazon. 😍
 
-Tu reçois ce message car tu es inscrit.e dans la boucle __**'{}'**__.
+Tu reçois ce message car tu es inscrit·e dans la boucle __**'{}'**__.
 Cette boucle est destinée aux informations générales de la mobilisation d'interpellation qui commence {}.\
 
 Cependant, cette boucle contient beaucoup d'activisites, et il n'est pas toujours pratique de suivre tous les 
-messages qui \ 
+messages qui \
 y passent ! 😱
 Ainsi, pour que tu puisses te concentrer sur les informations importantes, nous utiliserons en plus de cette grosse \
 boucle, une boucle privée.
@@ -188,7 +191,7 @@ et moi. 😊
 Mais moi, je suis qui au fait ?
 
 Je suis un programme informatique (un robot ! 🤖), et j'ai 3 rôles :
-👉🏼 Te transférer les instructions importantes des animateur.ice.s de la mobilisation {}. 
+👉🏼 Te transférer les instructions importantes des animateur·ices de la mobilisation {}. 
 👉🏼 Te suggérer des textes que tu pourra copier pour les poster sur twitter. 
 👉🏼 Te suggérer des tweets postés par d'autres activistes pour que tu les Like et les Retweete.
 
@@ -206,10 +209,10 @@ Allez, ensemble on va saturer twitter, et mettre la pression à Amazon !!! 💪�
 tu veux que j'espace mes messages. Par exemple, avec __**FREQ 60**__, je ne t'enverrai des messages qu'une fois par 
 heure.
 👉🏼 Si tu détectes un bug de mon fonctionnement, envoies-moi __**BUG**__ suivi de la description du problème, 
-ça aidera les informaticien.ne.s qui m'ont donné naissance !"""]
+ça aidera les informaticien·ne·s qui m'ont donné naissance !"""]
 GOODBYE_SCRIBE_MSGS = ["Au revoir Scribe!"]
 GOODBYE_PARTICIPANT_MSGS = [
-    ROBOT_MSG_SUFFIX + """Tu es sorti.e de la boucle d'interpellation. Je ne t'enverrai donc plus de message. 😊\nSi tu souhaites y  
+    ROBOT_MSG_SUFFIX + """Tu es sorti·e de la boucle d'interpellation. Je ne t'enverrai donc plus de message. 😊\nSi tu souhaites y  
 revenir plus tard, voici le lien : {}""".format(
         invite_link)]
 

@@ -1,5 +1,7 @@
 import datetime as dt
 import random
+import re
+import urllib
 from contextlib import AbstractContextManager
 
 from asgiref.sync import sync_to_async
@@ -503,7 +505,7 @@ class AbstractConnection(AbstractContextManager):
 
         text = MessageGenerator.generate_one_message([s.TWEET_TEXTS[text_id]])
 
-        messages = self._format_text_suggestion_mesage(text)
+        messages = self._format_text_suggestion_mesage(text, participant)
         for to_send in messages:
             await self.send(participant, channel, to_send, force=force)
 
@@ -541,12 +543,43 @@ class AbstractConnection(AbstractContextManager):
     def _format_url_suggestion_mesage(self, posted_tweet):
         name = posted_tweet.sender_name
         url = posted_tweet.url
-        msg = s.URL_SUGGESTION_MSG_STR.format(name, url)
+
+        try:   # todo_es inclure l'id du tweet à l'entrée dns la bdd
+            tweet_id = re.findall("https?://[a-zA-Z.]*?twitter.com/.*?/status/([0-9]*)",url)[0]
+            # todo_es : mettre dans la advanced_conf
+            retweet_url = "https://twitter.com/intent/retweet?tweet_id=" + tweet_id
+            reply_url = "https://twitter.com/intent/tweet?in_reply_to=" + tweet_id + \
+                        "&related=twitterdev&text=Je%20suis%20bien%20d%27accord%20%21%20%23StopAmazon%20" \
+                        "%23AmazonMacronComplice"  # todo_cr attention, pourvoir paramétrer la réponde dans settings,
+            # et changer les hastags!
+            like_url = "https://twitter.com/intent/like?tweet_id=" + tweet_id
+            # todo_es utiliser finally plutot
+        except:
+            # todo_es : mettre dans la advanced_conf
+            retweet_url = ""
+            reply_url = ""
+            like_url = ""
+
+        msg = s.URL_SUGGESTION_MSG_STR.format(name, url, like_url, retweet_url, reply_url)
         return msg
 
-    def _format_text_suggestion_mesage(self, text):
+    def _format_text_suggestion_mesage(self, text, participant):
         # Le message 'text' doit être dans un message bien distinct, afin de pouvoir facilement le copier-coller
-        return [s.TEXT_SUGGESTION_MSG_STR, text]
+        freq = participant.suggestions_frequency
+
+        if freq > 40 :
+            delta = int(freq/4)
+        else:
+            delta = 8  # todo_es revoir méthode de calcul
+        start = dt.datetime.now(s.TIMEZONE)
+        end = start + dt.timedelta(0, delta * 60)
+        start = start.strftime("%H:%M")
+        end = end.strftime("%H:%M")
+
+        text_encoded = {'text': text}
+        post_url = "https://twitter.com/compose/tweet?" + urllib.parse.urlencode(text_encoded)
+
+        return [s.TEXT_SUGGESTION_MSG_STR.format(post_url,start, end), text]
 
     async def right_time_for_suggestions(self):
         is_ok = await s.get_conf_value(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS')
@@ -597,7 +630,7 @@ class AbstractConnection(AbstractContextManager):
 
     def _get_main_channel(self) -> AbstractChannel:
         """
-        Retourne le channel principal sur lequel tous.tes les participant.e.s sont présent.e.s
+        Retourne le channel principal sur lequel tous·tes les participant·e·s sont présent·e·s
         """
         raise NotImplementedError()
 

@@ -348,7 +348,7 @@ class TelegramClientWrapper:
 
         def iter_participants(self, tg_channel, **kwargs):
             if tg_channel is None:
-                logging.error("On essaie d'obtenir les participant.e.s d'un channel qui n'a pas été trouvé")
+                logging.error("On essaie d'obtenir les participant·e·s d'un channel qui n'a pas été trouvé")
                 return iter([])
 
             try:
@@ -450,7 +450,7 @@ class TelegramConnection(AbstractConnection):
         """
         Overrides method in AbstractConnection.
 
-        Renvoie pour un.e participant.e donné.e le channel de conversation privée pour communiquer avec lui/elle
+        Renvoie pour un·e participant·e donné·e le channel de conversation privée pour communiquer avec lui/elle
         """
 
         # todo_es : dépalacer toute la gestion d'erreur dans TelegramClientWrapper?
@@ -480,7 +480,7 @@ class TelegramConnection(AbstractConnection):
     def is_bot(self, participant):
         """
         Overrides method in AbstractConnection.
-        Vérifie si le/la participant.e est le robot
+        Vérifie si le/la participant·e est le robot
         """
         logging.test(20053)
         return participant.get_normalised_id() == TelegramParticipantId(ts.BOT).get_normalised_id()
@@ -488,7 +488,7 @@ class TelegramConnection(AbstractConnection):
     async def is_admin(self, participant) -> bool:
         """
         Overrides method in AbstractConnection.
-        Vérifie si le/la participant.e est le robot
+        Vérifie si le/la participant·e est le robot
         """
         logging.test(20101)
         admins = await s.get_all_admins_ids(s.CAMPAIN_ID)
@@ -498,7 +498,7 @@ class TelegramConnection(AbstractConnection):
     def _is_me(self, participant):
         """
         Overrides method in AbstractConnection.
-        Vérifie si le/la participant.e est le compte ME (compte de test)
+        Vérifie si le/la participant·e est le compte ME (compte de test)
         """
         logging.test(20054)
         return participant.get_normalised_id() == TelegramParticipantId(ts.ME).get_normalised_id()
@@ -506,7 +506,7 @@ class TelegramConnection(AbstractConnection):
     async def _get_main_channel(self) -> TelegramChannel:
         """
         Overrides method in AbstractConnection.
-        Retourne le channel principal sur lequel tous.tes les participant.e.s sont présent.e.s
+        Retourne le channel principal sur lequel tous·tes les participant·e·s sont présent·e·s
 
         """
         logging.test(20055)
@@ -587,7 +587,7 @@ class TelegramConnection(AbstractConnection):
         """
         Overrides method in AbstractConnection.
 
-        Retourne tous.tes les participant.e.s d'un channel à partir du nom de ce dernier,
+        Retourne tous·tes les participant·e·s d'un channel à partir du nom de ce dernier,
         ainsi que le compte ME (compte de test) s'il fait partie de ce channel (necessaire
         si SEND_ONLY_TO_ME = True)
         @param known_participants:
@@ -687,7 +687,7 @@ class TelegramConnection(AbstractConnection):
                                                  first_time=False,
                                                  known_participants=[]):
         """
-        Retourne tous.tes les participant.e.s d'un channel
+        Retourne tous·tes les participant·e·s d'un channel
         """
 
         now = dt.datetime.now(s.TIMEZONE)

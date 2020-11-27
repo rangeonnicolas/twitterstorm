@@ -15,16 +15,13 @@ x clic to tweet
 - pinage de 1message récap
 
 ## wording
-X c'est mieux si les gens Répondent aux tweets
-X "postez-le entre 10:30 et 10:37 pour optimiser"
-X On essaie de tenir jusque, de manière régulière
-X url des tweets à composer : dire que s'ils sont pas connectés ça marchera pas !
+- On essaie de tenir jusque, de manière régulière
 
 ## rapide
 - gitter les fichiers config
 x TwitterWatch fonctionne t'il tjrs ?
 - !! detecter les mauvaises urls ! postées par les participants au robot
-x CHECK peut on piner un message
+- CHECK peut on piner un message
 - todo : n'accepter qu'un message a la fois (ex : bug https://twitter.com/actionclimat75/status/1326090258438643712 lol)
 - TW a 'til des logs chiants ? une grosse BDD?'
 - créer des users TG
@@ -34,22 +31,12 @@ x CHECK peut on piner un message
 
 ## Performance
 - Passer la sqlite3 en Django
-X Django avec Postgres
 - vider la BDD + suppression de doublons innutiles
 - todo_op
 - normalisation des urls des tweets pour éviter les doublons + vérification de doublon avat d'insérer dans la BDD
 
 # Tâches jour J
 ## J - 1
-- renommer le robos en "Nico2"
-- ajout des comptes (y compris BOT) à la boucle :
-    - 1 compte DEV
-    - 1 compte BOT
-    - 1 compte ACT-LAMBDA
-    - 1 compte SCRIBE-ANIMATOR
-    - 1 compte SCRIBE-ROBOT
-- todo_cr
-
 ## H - 2
 - dire aux gens que le robot s'appelle en fait Nicolas
 - message d'accueil (OPEN)
@@ -89,18 +76,18 @@ X Django avec Postgres
 
 # Monitoring & stats
 ## Stats de performance de campagne
-x nb de tweets sur twitter
+- nb de tweets sur twitter
 
 ## Monitoring appli
-? nb personnes acceptant les suggestions (is_ok)
-? histogramme de la fréquence de suggestion de chaque participant.e
+- nb personnes acceptant les suggestions (is_ok)
+- histogramme de la fréquence de suggestion de chaque participant.e
 - nb messages envoyés / recus en temps réel
 
 ## Monitoring technique
 ### Charge
-? temps d'itération de chaque boucle
-? nb de lignes dans chaque table de la BDD
-? temps de réponse moyen au messages "STOP", etc.
+- temps d'itération de chaque boucle
+- nb de lignes dans chaque table de la BDD
+- temps de réponse moyen au messages "STOP", etc.
 
 ### Audit du vidage de data
 - les logs :

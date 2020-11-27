@@ -11,12 +11,12 @@ REACHABLE_USERS = [
     1403511226,   # Pangolin Supersticieux
     483278428,    # Nico @nicolas_acp
     1499986438,   # Matthieu GP (Linda GP)
-    #1465837192,   # Johanna Klein ANV-Lyon
+    1465837192,   # Johanna Klein ANV-Lyon
     1097550906,   # [ROBOT]
 
     #629528913,   # ] : 'Anv2 A Pauline'
-    #827840716,   # ] : 'Baptiste B Coor'
-    #847535200,   # ] : 'Lrean robin Coor B'
+    827840716,   # ] : 'Baptiste B Coor'
+    847535200,   # ] : 'Lrean robin Coor B'
     #959532445,   # ] : 'Chloé B'
     #635446369,   # ] : 'Vincent B'
 ]

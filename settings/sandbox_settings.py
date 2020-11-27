@@ -78,7 +78,7 @@ et #AmazonMacronComplice ! N'hésitez pas à utiliser au max les ressources à v
 memes, visuels ...
 
 La journée n'est pas finie : à partir de 14h nous allons lancer cet outil d'interpellation qui permet d'envoyer un 
-mail aux député.e.s de son choix. 
+mail aux député·e·s de son choix. 
 
 À relayer sur vos RS respectifs. 
 
