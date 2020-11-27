@@ -4,8 +4,8 @@
 ### Important
 - fonction de suppression des trucs innutiles dans la BDD
 - enregistrement des clics de postage
-X updater en temps rééel le frequences
-x clic to tweet
+- updater en temps rééel le frequences
+- clic to tweet
 - analyse des perfs : logs à supprimer, BDD
 
 ### Intéressant
@@ -40,12 +40,6 @@ x TwitterWatch fonctionne t'il tjrs ?
 - LANCER LES SUGGESTIONS ;) (start suggestions / end suggestions)
 - remplir rapidement la BDD avec les tweets
 - transférer le message de lancement
-
-
-https://twitter.com/actionclimat75/status/1332247728622071810
-https://twitter.com/amisdelaterre/status/1332248288385519616
-
-(Marion Cubizolles)
 
 ## En continu
 - trnasférer les messages des animateur.ices EN SIGNANT A LA FIN !!!!
@@ -98,6 +92,10 @@ https://twitter.com/amisdelaterre/status/1332248288385519616
  
 # Futur
 ## Features
+- les suggestions vont aussi aux admins (aussi les msg des scribes mais c'est normal) : c'est bien ou pas?
+- !!! retirer les noms du code !!!
+- attention, les liens html ne passent pas quand on copie-colle à la main un message en mode animateur (en tout cas avec TG desktop ubuntu)
+- attention, avc les frequences par défaut, tout le monde se voit suggérer des tweets au meme moment. mettre un aléatoire dans les freq initiales MAIS aussi quand on augmente (pas augmenter de 20min pile tout le monsde) 
 - l'admin doit pouvoir suggérer des tweets (et voir accès aux autres actions possibles?)
 - les animateurs doivent pouvoir lancer la campagne et les suggetstions
 - conf : mettre des comptes twitter plus importants que d'autres qui ont plus de chances detre retwités

@@ -14,7 +14,7 @@ else:
     DEFAULT_SUGGESTIONS = True
     DEFAULT_SUGGESTIONS_FREQUENCY = 1.2
 
-END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 60 * 60)        # todo_es a changer
+END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 2 * 24 * 60 * 60)        # todo_es a changer
 
 ###################################################################################################
 import os
@@ -80,7 +80,7 @@ ANIMATOR_MSG_INTRO = "__**L'un·e des animateurs·ices de la mobilisation vient 
 
 SEND_ONLY_TO_ME_INTRO = "Message initialement destiné à \n{}\n(id={}) :\n\n{}"
 
-URL_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un tweet posté par un·e autre activiste (__**{}**__).
+URL_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un tweet suggéré par un·e autre activiste (__**{}**__).
 
 [Clique ici]({}) pour l'ouvrir, et si ce tweet te plaît, alors [Like-le]({}) et [Retweete-le]({}) 💪🏼 ! Et si tu est vraiment \
 déterminé·e, tu peux même y [répondre]({}) !
@@ -159,8 +159,8 @@ https://twitter.com/pseudo/status/13297...), je saurai donc les détecter dans l
 
 MESSAGE_NOT_UNDERSTOOD_STR_ADMIN = "Bon sérieux mec, j'ai pas pigé ton message. Voici les actions possibles : {}"
 
-SCRIBE_ACTION_ERROR = "Attention, vous êtes scribe. L'action '%s' n'est donc pas disponible pour vous."
-SCRIBE_FORWARDED_MESSAGE = "Comme vous êtes enregistré.e comme scribe, votre message a été transféré à %i participants"
+SCRIBE_ACTION_ERROR = "Attention, tu es scribe. L'action '%s' n'est donc pas disponible pour toi."
+SCRIBE_FORWARDED_MESSAGE = "Comme tu es enregistré·e comme scribe, ton message a été transféré à %i participant·e·s"
 
 
 

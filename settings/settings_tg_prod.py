@@ -22,7 +22,7 @@ REACHABLE_USERS = [
 ]
 
 import datetime as dt
-if dt.datetime.now() > dt.datetime(2020,11,27,13,0,0) and MAIN_CHANNEL_ID == -1001160681275:
+if dt.datetime.now() > dt.datetime(2020,11,28,20,0,0) and MAIN_CHANNEL_ID == -1001160681275:
     raise Exception("c'est fini le test non?")
 
 
