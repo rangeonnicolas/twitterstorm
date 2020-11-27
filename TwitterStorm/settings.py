@@ -23,8 +23,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '$4xl387628793%jpja-x55&87IUYIUYZIUEf9pyv+y+$ovj7pfe()ckr#+k')
 
+
+
+
+env = os.environ.get("TS_ENV_TYPE")
+if env is None:
+    raise Exception("Variable d'environnement TS_ENV_TYPE indéfinie")
+elif env.lower() == "dev":
+    TS_ENV_TYPE = "DEV"
+elif env.lower() == "prod":
+    TS_ENV_TYPE = "PROD"
+else:
+    raise Exception("La valeur de la variable d'environnement est erronée : " + env)
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+# DEBUG = os.environ.get('DJANGO_DEBUG', '') != 'False'
+DEBUG = TS_ENV_TYPE == "DEV"
+
 
 ALLOWED_HOSTS = ['vps255687.ovh.net', 'localhost', '164.132.231.178', '127.0.0.1']
 
@@ -75,13 +90,25 @@ WSGI_APPLICATION = 'TwitterStorm.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / 'db.sqlite3'),  # added 'str' here, according to
-        # https://forum.djangoproject.com/t/django-tutorial-python-manage-py-startapp-polls-fails/2718/4
+if TS_ENV_TYPE == "DEV":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': str(BASE_DIR / 'db.sqlite3'),  # added 'str' here, according to
+            # https://forum.djangoproject.com/t/django-tutorial-python-manage-py-startapp-polls-fails/2718/4
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'django_TS',
+            'USER': 'django',
+            'PASSWORD': os.environ.get('TS_POSTGRES_PW'),
+            'HOST': '127.0.0.1',
+            'PORT': '5432',
+        }
+    }
 
 
 # Password validation
