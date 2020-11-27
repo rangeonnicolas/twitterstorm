@@ -76,11 +76,10 @@ class Logger:
                 self.exception_counter = 0
 
     def _log(self, level, msg,  traceback = None):
-        if s.ENV_TYPE == "DEV":
-            print(msg)
-            if traceback is not None:
-                print()
-                print(traceback if traceback is not None else "")
+        print(msg)
+        if traceback is not None:
+            print()
+            print(traceback if traceback is not None else "")
         _write_in_files(level, msg,  traceback = traceback)
 
     def set_conn(self, conn):

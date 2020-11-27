@@ -9,7 +9,7 @@ import asyncio
 from settings import settings as s
 import daemon_loops.modules.logging as logging
 
-
+# todo_cr : il arrivue que le programme finisse sans rien dire alors que eror/log est rempli. pas cool
 # todo_chk : assouplir les regles de filtrage par is_reachable sinon c'est incompréhensible au debuggage,
 #  notamment dans _get_participants_from_channel
 # todo_es : renommer les noms des fichiers qui st en francais
