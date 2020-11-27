@@ -36,18 +36,16 @@ x TwitterWatch fonctionne t'il tjrs ?
 - normalisation des urls des tweets pour éviter les doublons + vérification de doublon avat d'insérer dans la BDD
 
 # Tâches jour J
-## J - 1
-## H - 2
-- dire aux gens que le robot s'appelle en fait Nicolas
-- message d'accueil (OPEN)
-
-## H - 1
-- chopper les TT
-
 ## H = 0
 - LANCER LES SUGGESTIONS ;) (start suggestions / end suggestions)
 - remplir rapidement la BDD avec les tweets
 - transférer le message de lancement
+
+
+https://twitter.com/actionclimat75/status/1332247728622071810
+https://twitter.com/amisdelaterre/status/1332248288385519616
+
+(Marion Cubizolles)
 
 ## En continu
 - trnasférer les messages des animateur.ices EN SIGNANT A LA FIN !!!!
@@ -100,6 +98,8 @@ x TwitterWatch fonctionne t'il tjrs ?
  
 # Futur
 ## Features
+- l'admin doit pouvoir suggérer des tweets (et voir accès aux autres actions possibles?)
+- les animateurs doivent pouvoir lancer la campagne et les suggetstions
 - conf : mettre des comptes twitter plus importants que d'autres qui ont plus de chances detre retwités
 - envoi de (mail/msg Teleg) à 5 amis chacun.e pour leur demander de retweeter
 - une conf dynamique modifiable en cours de route

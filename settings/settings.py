@@ -81,8 +81,9 @@ ANIMATOR_MSG_INTRO = "__**L'un·e des animateurs·ices de la mobilisation vient 
 SEND_ONLY_TO_ME_INTRO = "Message initialement destiné à \n{}\n(id={}) :\n\n{}"
 
 URL_SUGGESTION_MSG_STR = ROBOT_MSG_SUFFIX + """Voici un tweet posté par un·e autre activiste (__**{}**__).
+
 [Clique ici]({}) pour l'ouvrir, et si ce tweet te plaît, alors [Like-le]({}) et [Retweete-le]({}) 💪🏼 ! Et si tu est vraiment \
-déterminé·e, tu peux même y [répondre][{}] !
+déterminé·e, tu peux même y [répondre]({}) !
 
 Si tu veux que je me taise, envoies-moi '__**STOP**__' 😊 . 
 """
