@@ -13,6 +13,8 @@ import daemon_loops.modules.logging as logging
 # todo_chk : assouplir les regles de filtrage par is_reachable sinon c'est incompréhensible au debuggage,
 #  notamment dans _get_participants_from_channel
 # todo_es : renommer les noms des fichiers qui st en francais
+# todo_f : quand l'admin update les fréquences, le notifier automatiquement aux participants (ne pas faire un message groupé
+#  car pour certain.e.s, la fréquence n'a pas été atualisée. Par contre c'est bien dans le wording de dire 'ce qui compte maintenant, c'est la régularité'
 
 async def loops(conn, analyser):
     a = asyncio.create_task(main_listening_loop(conn, analyser))
