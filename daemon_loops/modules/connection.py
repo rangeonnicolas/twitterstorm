@@ -551,6 +551,7 @@ class AbstractConnection(AbstractContextManager):
     async def right_time_for_suggestions(self):
         is_ok = await s.get_conf_value(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS')
         if is_ok is None:
+            # todo_cr : cette excepiton instervient au tout premier lancement du programme quand la BDD n'est pas encore initialisée. Faire attention à ibintialise la BDD au tout début
             logging.error("On checke si on peut envoyer des suggestions sauf que la variable DEFAULT_SUGGESTIONS est absente de la configuration")
             is_ok = False
         return is_ok

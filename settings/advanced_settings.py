@@ -79,6 +79,7 @@ def getParticipantInConf(campain_id, participant_norm_id, type) -> (ConfigPartic
         obj = objs[0]
         for o in objs[1:]:
             o.delete()
+        return obj, cls
     elif len(objs) == 1:
         return objs[0], cls
     else:
