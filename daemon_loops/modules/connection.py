@@ -54,9 +54,13 @@ class AbstractMessageId:
 
 
 class AbstractChannel:
+    def __init__(self, title, specific_data):
+        self.title = title
+        self.specific_data = specific_data
+
     def get_specific_data(self) -> dict:
-        logging.test(30002)
-        raise NotImplementedError()
+        logging.test(20019)
+        return self.specific_data
 
 
 class AbstractMessage:
@@ -115,7 +119,8 @@ class AbstractParticipant:
                  suggestions_frequency,
                  last_suggestion_url_or_text,
                  last_text_suggestion_id,
-                 last_welcome_msg_received
+                 last_welcome_msg_received,
+                 specific_data
                  ):
         logging.test(30008)
         self._check_id_type(id_)
@@ -132,6 +137,7 @@ class AbstractParticipant:
         self.last_suggestion_url_or_text = last_suggestion_url_or_text
         self.last_text_suggestion_id = last_text_suggestion_id
         self.last_welcome_msg_received = last_welcome_msg_received
+        self.specific_data = specific_data
 
         self.last_checked_msg_id = None
         self.set_last_checked_msg(last_checked_msg_id)
@@ -142,7 +148,7 @@ class AbstractParticipant:
         logging.test(30009)
         return self.id.get_normalised_id()
 
-    def get_last_checked_message_id(self) -> str:
+    def get_last_checked_message_id(self) -> [str, None]:
         if self.last_checked_msg_id is None:
             logging.test(30010)
             return None
@@ -174,17 +180,17 @@ class AbstractParticipant:
     def is_trusted_participant_for_tweets(self) -> bool:
         raise NotImplementedError()
 
-    def get_specific_data(self) -> dict:
-        raise NotImplementedError()
-
     def _set_last_checked_msg(self, last_checked_message_id):
         raise NotImplementedError()
 
     def is_scribe(self):
         raise NotImplementedError()
 
+    def get_specific_data(self) -> dict:
+        return self.specific_data
+
     @staticmethod
-    def create_from_db(campain,
+    def from_db(campain,
                        normalised_id,
                        display_name,
                        is_ok,
@@ -200,6 +206,7 @@ class AbstractParticipant:
                        last_welcome_msg_received
                        ):
         raise NotImplementedError()
+
 
 
 class AbstractConnection(AbstractContextManager):
@@ -249,10 +256,12 @@ class AbstractConnection(AbstractContextManager):
         participants = await self._format_participants_info(await self._get_db_participants(consent=consent))
         return participants
 
-    async def check_for_new_participants_in_main_channel(self, first_time=False, known_participants_info=[]):
+    async def check_for_new_participants_in_main_channel(self, first_time=False, known_participants_info=None):
         """
 
         """
+        if known_participants_info is None:
+            known_participants_info = []
 
         known_participants = [pi['participant'] for pi in known_participants_info]
 
@@ -454,9 +463,13 @@ class AbstractConnection(AbstractContextManager):
         return pis
 
 
-    async def _filter_reachable_participants(self, participants_info, sender, exclude=[]):
+    async def _filter_reachable_participants(self, participants_info, sender, exclude=None):
+        if exclude is None:
+            exclude = []
         logging.test(30034)
-        def validate(p, sender, exclude = []):
+        def validate(p, sender, exclude = None):
+            if exclude is None:
+                execlude = []
             cond = p.is_ok
             cond = cond and not self.is_bot(p)  # todo_es regrouper les 3 conditiond en self._is_special , ca servira ailleurs dans le code
             cond = cond and (p.get_normalised_id() != sender.get_normalised_id())
@@ -647,5 +660,5 @@ class AbstractConnection(AbstractContextManager):
     def _send_message(self, channel, msg):
         raise NotImplementedError()
 
-    async def _get_new_participants_from_main_channel(self, first_time=False, known_participants=[]):
+    async def _get_new_participants_from_main_channel(self, first_time=False, known_participants=None):
         raise NotImplementedError()
