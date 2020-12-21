@@ -15,8 +15,7 @@ from telethon.sync import TelegramClient
 
 from settings import settings as s, telegram_settings as ts
 from daemon_loops.modules.connection import AbstractMessageId, AbstractParticipant, AbstractConnection, \
-    AbstractChannel, \
-    AbstractParticipantId, AbstractMessage
+    AbstractChannel, AbstractPersonnalChannel, AbstractParticipantId, AbstractMessage
 import daemon_loops.modules.logging as logging
 
 logging.info(s.INIT_MSG_TO_LOG)
@@ -111,6 +110,22 @@ class TelegramChannel(AbstractChannel):
 
     def get_tg_channel(self):
         logging.test(20020)
+        return self.specific_data['tg_channel']
+
+    def is_empty(self):
+        return self.specific_data['tg_channel'] is None
+
+class TelegramPersonnalChannel(AbstractPersonnalChannel):
+    def __init__(self, dict):
+        self.__dict__ = dict
+
+    @classmethod
+    def from_telethon_object(cls, tg_channel):
+        self = cls({})
+        AbstractPersonnalChannel.__init__(self, {'tg_channel': tg_channel})
+        return self
+
+    def get_tg_channel(self):
         return self.specific_data['tg_channel']
 
     def is_empty(self):
@@ -212,8 +227,8 @@ class TelegramParticipant(AbstractParticipant):
         return self
 
     @classmethod
-    def from_telethon_object(cls, tg_participant, now, suggestions_frequency, first_time):
-        return cls.from_args(
+    async def from_telethon_object(cls, tg_participant, now, suggestions_frequency, first_time):
+        participant = cls.from_args(
             s.CAMPAIN_ID,
             tg_participant.id,
             tg_participant.first_name,
@@ -230,6 +245,10 @@ class TelegramParticipant(AbstractParticipant):
             None,
             None,
         )
+        if await participant.has_special_role():
+            participant.is_ok = True
+
+        return participant
 
     @classmethod
     def from_pair(cls, p1, p2):
@@ -322,6 +341,22 @@ class TelegramParticipant(AbstractParticipant):
         scribes_ids = scribes_info.keys()
         return self.get_normalised_id() in scribes_ids
 
+
+    def is_bot(self):
+        """
+        Vérifie si le/la participant·e est le robot
+        """
+        logging.test(20053)
+        return self.get_normalised_id() == TelegramParticipantId(ts.BOT).get_normalised_id()
+
+    # todo_es a mettre ds a classe parente
+    async def is_admin(self):
+        admins = await s.get_all_admins_ids(s.CAMPAIN_ID)
+        return self.get_normalised_id() in admins
+
+    async def has_special_role(self) -> bool:
+        return await self.is_admin() or await self.is_scribe()
+
     def is_trusted_participant_for_tweets(self) -> bool:
         # todo_chk : voir si on veut garder cette feature
         logging.test(20037)
@@ -368,9 +403,10 @@ class TelegramClientWrapper:
             logging.exception(e)
             return []
 
-        return [TelegramMessage.from_telethon_object(m) for m in res]
+        res = [TelegramMessage.from_telethon_object(m) for m in res]
+        return res
 
-    async def get_input_entity(self, peer):
+    async def get_input_entity(self, peer) -> TelegramPersonnalChannel:
         tg_channel = None
         try:
             tg_channel = await self.client.get_input_entity(peer)
@@ -380,9 +416,9 @@ class TelegramClientWrapper:
                 "Si tu tombes là une fois, c'est qu'il est pertinent de laisser la suite du code dans "
                 "self._get_1to1_channel. Sinon, non ;)")  # todo_cr à retirer à terme
 
-        return TelegramChannel.from_telethon_object(tg_channel)
+        return TelegramPersonnalChannel.from_telethon_object(tg_channel)
 
-    async def get_entity(self, entity):
+    async def get_entity(self, entity) -> TelegramChannel:
         unknown_channel_msg = 'L\'identifiant du channel demandé ({}) est inconnu'.format(entity)
 
         try:
@@ -410,7 +446,7 @@ class TelegramClientWrapper:
     def send_code_request(self, *args, **kwargs):
         return self.client.send_code_request(*args, **kwargs)
 
-    async def get_dialogs(self, *args, **kwargs):
+    async def get_dialogs(self, *args, **kwargs) -> TelegramPersonnalChannel:
         res = []
         try:
             res = self.client.get_dialogs(*args, **kwargs)
@@ -422,7 +458,7 @@ class TelegramClientWrapper:
         except Exception:
             logging.exception("Erreur inconnue")
 
-        return [TelegramChannel.from_telethon_object(c) for c in res]
+        return [TelegramPersonnalChannel.from_telethon_object(c) for c in res]
 
     async def iter_participants(self, tg_channel, first_time = False, **kwargs):
         if tg_channel is None:
@@ -438,8 +474,8 @@ class TelegramClientWrapper:
         now = dt.datetime.now(s.TIMEZONE)
         default_sug_freq = await s.get_conf_value(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS_FREQUENCY')
 
-        res = [TelegramParticipant.from_telethon_object(p, now, default_sug_freq, first_time)
-               for p in tg_participants]
+        res = [await TelegramParticipant.from_telethon_object(p, now, default_sug_freq, first_time)
+               async for p in tg_participants]
         # todo_chk peut on utiliser yield ici?
 
         return iter(res)
@@ -562,16 +598,12 @@ class TelegramConnection(AbstractConnection):
         Vérifie si le/la participant·e est le robot
         """
         logging.test(20053)
-        return participant.get_normalised_id() == TelegramParticipantId(ts.BOT).get_normalised_id()
+        # todo_es cette méthode c'est un peu du rafistolage, et is_admin aussi
+        return participant.is_bot()
 
     async def is_admin(self, participant) -> bool:
-        """
-        Overrides method in AbstractConnection.
-        Vérifie si le/la participant·e est le robot
-        """
         logging.test(20101)
-        admins = await s.get_all_admins_ids(s.CAMPAIN_ID)
-        return participant.get_normalised_id() in admins
+        return await participant.is_admin()
 
     def _is_me(self, participant):
         """
@@ -608,7 +640,7 @@ class TelegramConnection(AbstractConnection):
         if len(messages):
             logging.test(20058)
             last_message_id = TelegramMessageId(
-                max([m.id for m in messages]))  # todo_es m.id devrait déjà renvoyer un TelegramMessageId non?
+                max([m.id.get_tg_id() for m in messages]))  # todo_es m.id devrait déjà renvoyer un TelegramMessageId non?
         elif last_checked_message_tg_id is not None:
             logging.test(20059)
             last_message_id = TelegramMessageId(last_checked_message_tg_id)
@@ -741,12 +773,16 @@ class TelegramConnection(AbstractConnection):
 
         known_participants_ids = [p.get_normalised_id() for p in known_participants]
 
+        already_seen_participants_ids = self.db.get_ids_of_former_participants()
+
         participants_iterable = await self.tg_client.iter_participants(channel.get_tg_channel(), aggressive=True, first_time = first_time)
         # todo_op le fonctionnement avc await est il optimisable ici ?
-        all_channel_participants = [{'p_id': p.get_normalised_id(),
-                                     'new_participant': p if p.get_normalised_id() not in known_participants_ids
-                                     else None}
-                                    async for p in participants_iterable] # todo_chk y'a un warning ici
+        all_channel_participants = [{'p_id': p.get_normalised_id(), # todo_es : simplifier cette groooooosse ligne (par exemple on fait plusieurs fois la verif 'in known_paticicpants_ids'
+                                     'new_participant':
+                                         p if p.get_normalised_id() not in known_participants_ids and p.get_normalised_id() not in already_seen_participants_ids
+                                        else (self.db.get_participant_by_id(p.get_normalised_id(), self._get_participant_class()) if p.get_normalised_id() not in known_participants_ids and p.get_normalised_id() in already_seen_participants_ids
+                                              else None)}
+                                    for p in participants_iterable] # todo_chk y'a un warning ici
         all_channel_participants_ids = [p['p_id'] for p in all_channel_participants]
         tg_new_participants = [p['new_participant'] for p in all_channel_participants if
                                p['new_participant'] is not None]
@@ -814,7 +850,7 @@ class TelegramConnection(AbstractConnection):
         # todo_cr : rester cette méthode
         logging.test(20094)
         channels = await self._get_all_channels()
-        filtered_channels = [ch for ch in channels if string is None or string.lower() in ch.title.lower()]
+        filtered_channels = [ch for ch in channels if string is None or string.lower() in ch.get_tg_channel().title.lower()]
         print("Liste des channels {}:".format("contenant '{}'".format(string) if string is not None else ""))
 
         for ch in filtered_channels:
@@ -824,7 +860,7 @@ class TelegramConnection(AbstractConnection):
                 cid = tg_channel.id
             else:
                 cid = ""
-            title = ch.title
+            title = ch.get_tg_channel().title
             print("- [id= {} ] : '{}'".format(cid, title))
 
     async def display_participants_of_main_channel(self, search=None):

@@ -17,6 +17,7 @@ else:
 END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 2 * 24 * 60 * 60)        # todo_es a changer
 
 DEFAULT_CONSENT_FORMER_MEMBERS = False  # Participants déjà sur la boucle au moment du lancement du programme (valeur par défaut s'iels ne sont pas dans la BDD)
+# todo_es : lea différentiation DEFAULT_CONSENT_NEWCOMERS et DEFAULT_CONSENT_FORMER_MEMBERS est en cas de plantage de BDD. Il faudrait daire plutôt une variable de conf spéciale (en JSON) regrouppant les variables de plantage de BDD
 DEFAULT_CONSENT_NEWCOMERS = True
 
 ###################################################################################################

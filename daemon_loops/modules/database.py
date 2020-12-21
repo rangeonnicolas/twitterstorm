@@ -237,7 +237,7 @@ class DataBase:
     def insert_participants(self, participants, now):
 
         participant_ids = [p.get_normalised_id() for p in participants]
-        returning_users_ids = self._check_for_former_data_about_participants(participant_ids)
+        returning_users_ids = self.get_ids_of_former_participants(ids = participant_ids)
 
 
         queries = []
@@ -281,7 +281,7 @@ class DataBase:
             q += " is_ok = {} and".format(cnst)
         q += " campain = '{}'".format(s.CAMPAIN_ID)
         for row in self._select(q, []):
-            result += [participant_class.create_from_db(*row)]
+            result += [participant_class.from_db(*row)]
         ids = list(set([r.get_normalised_id() for r in result]))  # dedoublonage (innutile si last versio)
 
         result = [[r for r in result if r.get_normalised_id() == id_][0] for id_ in ids]
@@ -289,18 +289,40 @@ class DataBase:
         return result
 
 
-    def _check_for_former_data_about_participants(self, ids):
+    def get_participant_by_id(self, id, participant_class):
+        result = []
+        q = "select {} from participant where ".format(",".join(self.PARTICIPANT_FIELDS))
+        q += "version = (select max(version) from participant "
+        q += "           where campain = '{}' and normalised_id = '{}') ".format(s.CAMPAIN_ID, id)
+        q += "and campain = '{}' ".format(s.CAMPAIN_ID)
+        q += "and normalised_id = '{}' ".format(id)
+        for row in self._select(q, []):
+            result += [participant_class.from_db(*row)]
 
-        if len(ids):
+        #print(928789, "\n\nRETURNING USER!!!!!!!!! ", result[0].display_name)
 
-            q = "select normalised_id from participant       " + \
-                "where campain = '{}'                        ".format(s.CAMPAIN_ID) + \
-                "      and normalised_id in ('{}')             ".format("','".join(ids))
+        if len(result) > 1:
+            logging.critical("Plusieurs participants trouvés pour une même version")
+        elif len(result) == 1:
+            return result[0]
+        else :
+            return None
+
+    # todo_es cette méthode est appelé 2 fois à peu près au même moment, et je mettrais ma main à couper que c'est redondant :p
+    def get_ids_of_former_participants(self, ids=None):
+
+        if ids is None or len(ids):
+
+            q = "select distinct normalised_id from participant       " + \
+                "where campain = '{}'                                 ".format(s.CAMPAIN_ID)
+            if ids is not None:
+                q += " and normalised_id in ('{}')                    ".format("','".join(ids))
 
             result = [row[0] for row in self._select(q, [])]
 
-
             return result
+        else:
+            return []
 
     def update_last_arrival_in_channel(self, participants, now):
 

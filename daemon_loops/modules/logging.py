@@ -110,7 +110,7 @@ def error(msg, *args):
 def critical(msg, *args):
     msg = str(msg) % args
     from daemon_loops.modules.twitterstorm_utils import TwitterstormError
-    logger.log("CRITICAL", msg)
+    exception(TwitterstormError(msg), level = "CRITICAL")
     raise TwitterstormError(msg)
 
 # todo_es : faut il conidérer que les ereur "was never awaited" sont "critical" ?

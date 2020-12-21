@@ -92,6 +92,7 @@ x TwitterWatch fonctionne t'il tjrs ?
  
 # Futur
 ## Features
+- !! important : quand on cherche les id TG des boucles et personnes, on se connecte avec son compte perso et la session reste enregistrée, et si on fait pas gaffe le programme général tourne avec cette session. #30hdeDebugPourRien
 - les suggestions vont aussi aux admins (aussi les msg des scribes mais c'est normal) : c'est bien ou pas?
 - !!! retirer les noms du code !!!
 - attention, les liens html ne passent pas quand on copie-colle à la main un message en mode animateur (en tout cas avec TG desktop ubuntu)

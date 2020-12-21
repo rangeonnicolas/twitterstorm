@@ -62,6 +62,13 @@ class AbstractChannel:
         logging.test(20019)
         return self.specific_data
 
+class AbstractPersonnalChannel:  # todo_es surement useless après refoctorig du {'participant': .., '1to1channel'}
+    def __init__(self, specific_data):
+        self.specific_data = specific_data
+
+    def get_specific_data(self) -> dict:
+        return self.specific_data
+
 
 class AbstractMessage:
     def __init__(self, id_, message_str, received_at, sender_id):
@@ -186,6 +193,9 @@ class AbstractParticipant:
     def is_scribe(self):
         raise NotImplementedError()
 
+    def has_special_role(self) -> bool:
+        raise NotImplementedError()
+
     def get_specific_data(self) -> dict:
         return self.specific_data
 
@@ -266,7 +276,7 @@ class AbstractConnection(AbstractContextManager):
         known_participants = [pi['participant'] for pi in known_participants_info]
 
         new_participants, participants_still_here, participants_who_left, me = await self._get_new_participants_from_main_channel(
-            first_time=first_time, known_participants=known_participants)
+            first_time=first_time, known_participants=known_participants)  # todo_es les 2 agruments en mots clés peuvent être mis en arguments positionnels
 
         new_participants_info = await self._format_participants_info(new_participants)
         participants_who_left_info = await self._format_participants_info(participants_who_left)
@@ -283,7 +293,7 @@ class AbstractConnection(AbstractContextManager):
         return await self._format_participants_info(await self._get_db_participants())
         # todo_op: en vrai on peut optimiser un peu en n'allant pas tout rechercher dans la BDD hein
         # todo_chk : si on enleve cette ligne, plus jamais on ne va fetcher les participants
-        # dans la BDD, sauf à l'ilitialisation du prog, enfin si tu le programme un jour... :s
+        #  dans la BDD, sauf à l'ilitialisation du prog (et quand un utilisateur déjà connu revient ds la boucle), enfin si tu le programme un jour... :s
 
 
     async def _check_me(self, me):
@@ -600,7 +610,7 @@ class AbstractConnection(AbstractContextManager):
         """
         raise NotImplementedError()
 
-    async def _get_1to1_channel(self, participant) -> AbstractChannel:
+    async def _get_1to1_channel(self, participant) -> AbstractPersonnalChannel:
         """
 
         """
@@ -626,6 +636,7 @@ class AbstractConnection(AbstractContextManager):
 
         """
         raise NotImplementedError()
+
 
     def _get_main_channel(self) -> AbstractChannel:
         """
