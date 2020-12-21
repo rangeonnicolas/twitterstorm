@@ -412,31 +412,17 @@ class AbstractConnection(AbstractContextManager):
         @rtype: None
         """
 
-        if not await s.get_conf_value(s.CAMPAIN_ID, 'SEND_ONLY_TO_ME'):
-            logging.test(30029)
-            if not self.is_bot(participant) and await self._is_reachable(participant):
-                logging.test(30032)
-                logging.test(30033)
-                logging.test(30034)
-                if participant.is_ok or force:
-                    await self._send_and_record_message(participant, channel, msg)
+        if not self.is_bot(participant) and await self._is_reachable(participant):
+            # todo_f : vérifier dans la conf que ME n'est pas le bot
+            if participant.is_ok or force:
+                if await s.get_conf_value(s.CAMPAIN_ID, 'SEND_ONLY_TO_ME'):
+                    if self.me is None or self.my_channel is None:
+                        logging.error("Il semble que self.me ou self.my_channel n'aient pas été initialisés.")
+                    msg = s.SEND_ONLY_TO_ME_INTRO.format(participant.display_name,participant.get_normalised_id(), msg)
+                    participant = self.me
+                    channel = self.my_channel
+                await self._send_and_record_message(participant, channel, msg)
 
-                else:
-                    pass
-                    # todo_es dans la boucle de suggestion, on charge des gens qui sont pas OK, c'st bof, on tente quand meêm de leur envoyer des msg
-
-            else:  ###
-                logging.test(30033)
-        else:
-            logging.test(30030)
-            if self.me is None or self.my_channel is None:
-                logging.test(30031)
-                logging.error("Il semble que self.me ou self.my_channel n'aient pas été initialisés.")
-            else:  ###
-                logging.test(30032)
-            msg = s.SEND_ONLY_TO_ME_INTRO.format(participant.display_name,
-                                                                                participant.get_normalised_id(), msg)
-            await self._send_and_record_message(self.me, self.my_channel, msg)
 
     async def send_message_to_all_participants(self, message, scribe, participants_info):
         sc_id = scribe.get_normalised_id()

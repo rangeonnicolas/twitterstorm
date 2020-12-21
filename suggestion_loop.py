@@ -24,7 +24,7 @@ async def _loop_action(conn, now, last_new_participants_check):
         # todo_f : faire en sorte que ce soit
         #  dynmique le start et end (genre c'est le scribe qui envoie des signaux)
 
-        participants_info = await conn.fetch_all_participants()
+        participants_info = await conn.fetch_all_participants(consent=True)
 
         for j, pi in enumerate(participants_info):
 

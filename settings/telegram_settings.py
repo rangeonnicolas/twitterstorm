@@ -1,4 +1,6 @@
 
+# todo_es : en fait tous ces settings là devraient être dans le setting principal, et les identifiants devraient être
+#  écrits sous forme TeleGramUserId(28973987)
 
 nicolas_acp = 483278428 # todo_es : pas bo
 ME = nicolas_acp # compte servant à tester le programme lorsque SEND_ONLY_TO_ME = True

@@ -3,9 +3,9 @@ from settings.advanced_settings import TIMEZONE, LOG_DIR, DATA_DIR, SESSION_LIST
 from settings.advanced_settings import *
 
 ###################################################################################################
-CAMPAIN_ID = "TwitterStrorm_BF1"
+CAMPAIN_ID = "Demo_dec20"
 
-USE_SANDBOX = False
+USE_SANDBOX = True
 
 if not USE_SANDBOX:
     DEFAULT_SUGGESTIONS = False                                                  # todo_es : changer le nom de la variable en BDD mais pas ici ;)
@@ -15,6 +15,9 @@ else:
     DEFAULT_SUGGESTIONS_FREQUENCY = 1.2
 
 END_LISTENING_LOOP = dt.datetime.now(TIMEZONE) + dt.timedelta(0, 2 * 24 * 60 * 60)        # todo_es a changer
+
+DEFAULT_CONSENT_FORMER_MEMBERS = False  # Participants déjà sur la boucle au moment du lancement du programme (valeur par défaut s'iels ne sont pas dans la BDD)
+DEFAULT_CONSENT_NEWCOMERS = True
 
 ###################################################################################################
 import os
@@ -56,7 +59,6 @@ DEFAULT_IS_CAMPAIN_OPEN = False
 
 MIN_SUGGESTION_FREQUENCY = 0.5  # En minutes
 
-DEFAULT_CONSENT = True
 DEFAULT_TWEET_VALIDATION = False  # todo_chk useless
 
 # todo_chk réhabiliter ces 2 params?

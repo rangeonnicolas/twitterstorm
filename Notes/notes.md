@@ -106,6 +106,7 @@ x TwitterWatch fonctionne t'il tjrs ?
 - faire une boucle asynchone d'envoie des messages (ainsi les boucles sandbox et suggestions n'auront plus à avoir des fonctions asynchrones)
 - interface de monitoring
 - gestion des Exceptions (à ennvoyer sur le cpt DEV)
+- dans les différentes boucles, il faut parfois recharger les données qui sont en BDD. Exemple boucle suggestion : quand on modifie le is_ok directement dans la BDD, ça ne s'actualise pas dans le programme
 
 ## optim
 - todo_chk
