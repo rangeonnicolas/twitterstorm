@@ -290,6 +290,7 @@ class DataBase:
 
 
     def get_participant_by_id(self, id, participant_class):
+        # todo_es : quand un user revient dans la boucle, il faudrait lui actualiser certains champs comme son nom par exemple
         result = []
         q = "select {} from participant where ".format(",".join(self.PARTICIPANT_FIELDS))
         q += "version = (select max(version) from participant "

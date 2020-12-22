@@ -472,6 +472,7 @@ class TelegramClientWrapper:
             return iter([])
 
         now = dt.datetime.now(s.TIMEZONE)
+        # todo_es : !!!! lors d'une suppression de bdd postgres (ou nouveau campain_id), cette ligne plante au tout premier lancement, pas au 2nd
         default_sug_freq = await s.get_conf_value(s.CAMPAIN_ID, 'DEFAULT_SUGGESTIONS_FREQUENCY')
 
         res = [await TelegramParticipant.from_telethon_object(p, now, default_sug_freq, first_time)

@@ -40,6 +40,9 @@ async def sandbox_loop(conn):
 
     last_loop_execution = dt.datetime(1970, 1, 1, tzinfo=sb.TIMEZONE)
 
+    await sb.populate();
+    # todo_es : populate ne doit s'exécuter que si la campagne est nouvelle (ou si effacement BDD)
+
     while now < END_SANDBOX_LOOP:
 
         last_loop_execution = await wait_for_next_iteration(last_loop_execution, NEW_SANDBOX_LOOP_ITERATION_EVERY)
